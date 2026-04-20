@@ -10,6 +10,9 @@ if len(sys.argv) < 2:
 command = sys.argv[1]
 
 if command == "add":
+    if len(sys.argv) < 3:
+        print("please input title")
+        exit
     title = sys.argv[2]
     manager.add_task(title)
     print("已添加")
