@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 @dataclass
 class Task:
+    index: int
     title: str
     done: bool = False
     

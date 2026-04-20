@@ -5,15 +5,12 @@ class TodoManager:
         self.tasks: List[Task] = []
         
     def add_task(self, title):
-        self.tasks = [task for task in self.tasks if task.title != title]
-    
-    def delete_task(self,index: int):
-        task = Task(index = index)
-        self.tasks.remove(task)
+        index = len(self.tasks)
+        task = Task(index = index, title=title)
+        self.tasks.append(task)
 
     def list_tasks(self):
-        for i, task in enumerate(self.tasks):
-            print(f"{i}: {task.display()} ")
+        return self.tasks
             
     def task_done(self, index: int):
         for task in self.tasks:
