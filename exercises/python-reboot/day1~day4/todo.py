@@ -21,36 +21,33 @@ def main():
 
     args = parser.parse_args()
 
-    if args.command == "add":
-        manager.add_task(args.title)
-        print("タスクを追加しました")
+    try:
+        if args.command == "add":
+            manager.add_task(args.title)
+            print("タスクを追加しました")
 
+        elif args.command == "list":
+            tasks = manager.list_tasks()
+            if not tasks:
+                print("タスクはありません")
+            else:
+                for task in tasks:
+                    print(task.display())
 
-    elif args.command == "list":
-        tasks = manager.list_tasks()
-        if not tasks:
-            print("タスクはありません")
-        else:
-            for task in tasks:
-                print(task.display())
+        elif args.command == "done":
+            manager.task_done(args.index - 1)
+            print("タスクを完了しました")     
 
-    elif args.command == "done":
-        success = manager.task_done(args.index - 1)
-        if success:
-            print("タスクを完了しました")
-        else:
-            print("その index のタスクはありません")
-
-    elif args.command == "remove":
-        success = manager.remove_task_by_index(args.index - 1)
-        if success:
+        elif args.command == "remove":
+            manager.remove_task_by_index(args.index - 1)
             print("タスクを削除しました")
+
         else:
-            print("その index のタスクはありません")
-
-    else:
-        parser.print_help()
-
+            parser.print_help()
+            
+    except ValueError:
+        print("その index のタスクはありません")
+    
 
 if __name__ == "__main__":
     main()

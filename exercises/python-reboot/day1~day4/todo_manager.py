@@ -18,19 +18,21 @@ class TodoManager:
         return self.tasks
             
     def task_done(self, index: int):
-        for task in self.tasks:
-            if task.index == index:
-                task.done_task()
-                return task
-            return None
+        if 0 <= index < len(self.tasks):
+            self.tasks[index].done = True
+            self.save_tasks
+            return self.tasks[index]
+        
+        raise ValueError("task not found")
                 
                 
     def remove_task_by_index(self, index: int):
         if 0 <= index < len(self.tasks):
-            self.tasks.pop(index)
-            for i, task in enumerate(self.tasks):
-                task.index = i
+            task = self.tasks.pop(index)
             self.save_tasks()
+            return task
+            
+        raise ValueError("task not found")
         
     def total_list(self) -> int:
         return len(self.tasks)
