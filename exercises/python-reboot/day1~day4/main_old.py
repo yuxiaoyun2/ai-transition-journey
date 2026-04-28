@@ -19,7 +19,13 @@ def main():
 
     elif command == "done":
         index = int(sys.argv[2])
-        todo.mark_done(index)
+        task = todo.task_done(index)
+        
+        if task:
+            print(task.display())
+        else:
+            print("task no exist")
+        
 
     elif command == "delete":
         index = int(sys.argv[2])

@@ -20,15 +20,16 @@ class TodoManager:
     def task_done(self, index: int):
         for task in self.tasks:
             if task.index == index:
-                task.done = True
+                task.done_task()
+                return task
+            return None
+                
                 
     def remove_task_by_index(self, index: int):
         if 0 <= index < len(self.tasks):
             self.tasks.pop(index)
-            
             for i, task in enumerate(self.tasks):
                 task.index = i
-                
             self.save_tasks()
         
     def total_list(self) -> int:

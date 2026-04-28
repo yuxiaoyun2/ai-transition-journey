@@ -25,6 +25,7 @@ def main():
         manager.add_task(args.title)
         print("タスクを追加しました")
 
+
     elif args.command == "list":
         tasks = manager.list_tasks()
         if not tasks:
