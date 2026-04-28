@@ -5,15 +5,14 @@ class Task:
     title: str
     done: bool = False
     
-    # def display(self) -> str:
-    #     mark = "✅"  if self.done else "❌" 
-    #     return f"{self.index +1 } {self.title} {mark}"
-    
     def to_dict(self):
         return asdict(self)
     
     @classmethod
-    def from_dict(cls,data, index=None):
+    def from_dict(cls,data, index=0):
+        if "title" not in data:
+            raise ValueError("title is required")
+        
         return cls(
             index=data.get("index", index),
             title=data["title"],
