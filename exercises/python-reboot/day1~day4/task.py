@@ -10,18 +10,29 @@ class Task:
     
     @classmethod
     def from_dict(cls,data, index=0):
-        if "title" not in data:
+        if not isinstance(data, dict):
+            raise ValueError("invalid item type")
+        if "title" not in data or not isinstance(data["title"], str):
             raise ValueError("title is required")
         
+        raw_index = data.get("index", index)
+        try:
+            fixed_index = int(raw_index)
+        except (TypeError, ValueError):
+            fixed_index = index
+            
+        done = data.get("done", False)
+        done = bool(done)
+        
         return cls(
-            index=data.get("index", index),
+            index=data.get("index", fixed_index),
             title=data["title"],
-            done=data.get("done", False)
+            done=done
         )
         
     def display(self) -> str:
-        mark = "[x]" if  self.done else "[ ]"
-        return f"{mark} {self.index +1 }. {self.title}"
+        mark = "[x]" if self.done else "[ ]"
+        return f"{self.index + 1}. {mark} {self.title}"
     
     def done_task(self):
         self.done = True

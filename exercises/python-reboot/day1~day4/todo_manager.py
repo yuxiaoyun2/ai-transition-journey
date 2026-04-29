@@ -29,6 +29,7 @@ class TodoManager:
     def remove_task_by_index(self, index: int):
         if 0 <= index < len(self.tasks):
             task = self.tasks.pop(index)
+            self.reindex_tasks()
             self.save_tasks()
             return task
             
@@ -41,14 +42,32 @@ class TodoManager:
         if not os.path.exists(self.file_path):
             self.tasks = []
             return
-        
-        with open(self.file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        try:
+            with open(self.file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except json.JSONDecodeError:
+            print("⚠️ JSON 文件损坏，已重置为空列表")
+            self.tasks = []
+            return
             
-        self.tasks = [Task.from_dict(item, index=i) for i,item in enumerate(data)]
+        tasks = []
+        for i, item in enumerate(data):
+            try:
+                task = Task.from_dict(item, index=i)
+                tasks.append(task)
+            except ValueError as e:
+                print(f"跳过非法数据: {item}, ({e})")
+        self.tasks = tasks
+        self.reindex_tasks()
+        self.save_tasks()
         
     def save_tasks(self):
         data = [task.to_dict() for task in self.tasks]
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii= False, indent=2)
+            
+    def reindex_tasks(self):
+        for i, task in enumerate(self.tasks):
+            task.index = i
+    
     
