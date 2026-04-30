@@ -14,13 +14,29 @@ class TodoManager:
         self.tasks.append(task)
         self.save_tasks()
 
-    def list_tasks(self):
-        return self.tasks
+    def get_tasks(self, undone: bool = False, done: bool = False, sort = None, keyword=None):
+        tasks = self.tasks
+        if undone:
+            tasks = filter(lambda task: not task.done, tasks)
+            
+        elif done:
+            tasks = filter(lambda task: task.done, tasks)
+                    
+        if keyword:
+            tasks = filter(lambda task: keyword.lower() in task.title.lower(), tasks)
+            
+        if sort== "asc":
+            tasks = sorted(tasks, key=lambda task: task.index)
+            
+        elif sort == "desc":
+            tasks = sorted(tasks, key=lambda task: task.index, reverse=True)
+        
+        return list(tasks)
             
     def task_done(self, index: int):
         if 0 <= index < len(self.tasks):
             self.tasks[index].done = True
-            self.save_tasks
+            self.save_tasks()
             return self.tasks[index]
         
         raise ValueError("task not found")
@@ -70,4 +86,17 @@ class TodoManager:
         for i, task in enumerate(self.tasks):
             task.index = i
     
+    # def list_tasks_sorted_by_index(self):
+    #    return sorted(self.tasks, key=lambda task: task.index)
     
+    # def list_tasks_sorted_desc(self):
+    #     return sorted(self.tasks, key=lambda task: task.index, reverse= True)
+    
+    # def list_undone_tasks(self):
+    #     return list(filter(lambda task: not task.done, self.tasks))
+    
+    # def list_undone_sorted(self):
+    #     return sorted(filter(lambda task: not task.done, self.tasks ), key = lambda task: task.index)
+    
+    def get_done_tasks_sorted_desc(self):
+        return sorted(filter(lambda task: task.done, self.tasks), key=lambda task:task.index, reverse= True)
