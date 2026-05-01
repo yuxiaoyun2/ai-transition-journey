@@ -31,8 +31,7 @@ class Task:
         )
         
     def display(self) -> str:
-        mark = "[x]" if self.done else "[ ]"
-        return f"{self.index + 1}. {mark} {self.title}"
+        return f"{self.index + 1}. [{"x" if self.done else " "}] {self.title}"
     
     def done_task(self):
         self.done = True
