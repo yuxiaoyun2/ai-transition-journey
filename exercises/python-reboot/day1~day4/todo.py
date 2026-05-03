@@ -6,13 +6,11 @@ def print_tasks(tasks: list[Task]):
     for task in tasks:
         print(task.display())
 
-def main():
-    manager = TodoManager()
-
-    parser = argparse.ArgumentParser(description="Simple Todo CLI")
+def create_parser():
+    parser = argparse.ArgumentParser(description="Simple todo CLI")
     subparsers = parser.add_subparsers(dest="command")
+    subparsers.required = True
     
-
     add_parser = subparsers.add_parser("add", help="Add a new task")
     add_parser.add_argument("title", type=str, help="Task title")
 
@@ -28,42 +26,61 @@ def main():
     remove_parser = subparsers.add_parser("remove", help="Remove a task")
     remove_parser.add_argument("index", type=int, help="Task index")
     
+    return parser
+    
+def handle_list(manager, args):
+    if args.done and args.undone:
+        print("--done と --undone は同時に指定できません") 
+        return
+    tasks = manager.get_tasks(undone=args.undone, done=args.done, sort=args.sort, keyword=args.keyword)  
+    if not tasks:
+        if args.keyword:
+            print("条件に一致するタスクはありません")
+        elif args.undone:
+            print("未完了のタスクはありません") 
+        elif args.done:
+            print("完了したタスクはありません")
+        else:
+            print("タスクはありません")
+    else:
+        print_tasks(tasks) 
+    
+def handle_done(manager, args):
+    try:
+        manager.task_done(args.index - 1)
+        print("タスクを完了しました")
+    except ValueError:
+        print(f"その番号のタスクはありません: {args.index}")
+        
+def handle_remove(manager, args):
+    try:
+        manager.remove_task_by_index(args.index - 1)
+        print("タスクを削除しました")
+    except ValueError:
+        print(f"その番号のタスクはありません: {args.index}")
+            
+def handle_add(manager, args):
+    manager.add_task(args.title)
+    print("タスクを追加しました")
+
+def main():
+    manager = TodoManager()
+    
+    parser = create_parser()
+    
     args = parser.parse_args()
 
     if args.command == "add":
-        manager.add_task(args.title)
-        print("タスクを追加しました")
+        handle_add(manager, args)
 
     elif args.command == "list":
-        if args.done and args.undone:
-            print("--done と --undone は同時に指定できません") 
-            return
-        tasks = manager.get_tasks(undone=args.undone, done=args.done, sort=args.sort, keyword=args.keyword)  
-        if not tasks:
-            if args.keyword:
-                print("条件に一致するタスクはありません")
-            elif args.undone:
-                print("未完了のタスクはありません") 
-            elif args.done:
-                print("完了したタスクはありません")
-            else:
-                print("タスクはありません")
-        else:
-            print_tasks(tasks)
+        handle_list(manager, args)
 
     elif args.command == "done":
-        try:
-            manager.task_done(args.index - 1)
-            print("タスクを完了しました")
-        except ValueError:
-            print(f"その番号のタスクはありません: {args.index}")
+        handle_done(manager, args)
         
     elif args.command == "remove":
-        try:
-            manager.remove_task_by_index(args.index - 1)
-            print("タスクを削除しました")
-        except ValueError:
-            print(f"その番号のタスクはありません: {args.index}")
+        handle_remove(manager, args)
             
     else:
         parser.print_help()

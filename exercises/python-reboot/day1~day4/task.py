@@ -21,17 +21,16 @@ class Task:
         except (TypeError, ValueError):
             fixed_index = index
             
-        done = data.get("done", False)
-        done = bool(done)
+        done = bool(data.get("done", False))
         
         return cls(
-            index=data.get("index", fixed_index),
+            index=fixed_index,
             title=data["title"],
             done=done
         )
         
     def display(self) -> str:
-        return f"{self.index + 1}. [{"x" if self.done else " "}] {self.title}"
+        return f"{self.index + 1}. [{'x' if self.done else ' '}] {self.title}"
     
     def done_task(self):
         self.done = True
