@@ -47,7 +47,7 @@ def handle_list(manager, args):
     
 def handle_done(manager, args):
     try:
-        manager.task_done(args.index - 1)
+        manager.mark_done(args.index - 1)
         print("タスクを完了しました")
     except ValueError:
         print(f"その番号のタスクはありません: {args.index}")

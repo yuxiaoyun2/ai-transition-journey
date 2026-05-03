@@ -19,7 +19,7 @@ def main():
 
     elif command == "done":
         index = int(sys.argv[2])
-        task = todo.task_done(index)
+        task = todo.mark_done(index)
         
         if task:
             print(task.display())

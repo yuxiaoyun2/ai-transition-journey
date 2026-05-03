@@ -33,7 +33,7 @@ class TodoManager:
         
         return list(tasks)
             
-    def task_done(self, index: int):
+    def mark_done(self, index: int):
         if 0 <= index < len(self.tasks):
             self.tasks[index].done = True
             self.save_tasks()
@@ -98,5 +98,5 @@ class TodoManager:
     # def list_undone_sorted(self):
     #     return sorted(filter(lambda task: not task.done, self.tasks ), key = lambda task: task.index)
     
-    def get_done_tasks_sorted_desc(self):
-        return sorted(filter(lambda task: task.done, self.tasks), key=lambda task:task.index, reverse= True)
+    # def get_done_tasks_sorted_desc(self):
+    #     return sorted(filter(lambda task: task.done, self.tasks), key=lambda task:task.index, reverse= True)
