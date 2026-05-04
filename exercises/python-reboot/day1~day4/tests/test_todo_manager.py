@@ -1,4 +1,5 @@
 from todo_manager import TodoManager
+import pytest
 
 def test_add_task(tmp_path):
     manager = TodoManager(file_path=str(tmp_path/"test.json"))
@@ -78,4 +79,28 @@ def test_get_tasks_keyword(tmp_path):
     assert "sleep" in titles
     assert "dinner Sleep" in titles
     
+def test_mark_done_invalid_index(tmp_path):
+    manager = TodoManager(file_path=str(tmp_path/"test.json"))
     
+    manager.add_task("study")
+    
+    with pytest.raises(ValueError):
+        manager.mark_done(999)
+        
+def test_remove_invalid_index(tmp_path):
+    manager = TodoManager(file_path=str(tmp_path/"test.json"))
+    
+    manager.add_task("study")
+    
+    with pytest.raises(ValueError):
+        manager.remove_task_by_index(999)
+        
+def test_keyword_empty(tmp_path):
+    manager = TodoManager(file_path=str(tmp_path/"test.json"))
+    
+    manager.add_task("study")
+    
+    tasks = manager.get_tasks(keyword="")
+    
+    assert len(tasks) == 1
+        
