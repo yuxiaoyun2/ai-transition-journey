@@ -8,6 +8,7 @@ def print_tasks(tasks: list[Task]):
 
 def create_parser():
     parser = argparse.ArgumentParser(description="Simple todo CLI")
+    parser.add_argument("--file", default="todo.json")
     subparsers = parser.add_subparsers(dest="command")
     subparsers.required = True
     
@@ -64,11 +65,12 @@ def handle_add(manager, args):
     print("タスクを追加しました")
 
 def main():
-    manager = TodoManager()
     
     parser = create_parser()
     
     args = parser.parse_args()
+    
+    manager = TodoManager(file_path=args.file)
 
     if args.command == "add":
         handle_add(manager, args)
