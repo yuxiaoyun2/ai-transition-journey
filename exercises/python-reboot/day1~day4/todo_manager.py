@@ -33,6 +33,14 @@ class TodoManager:
             
         elif sort == "desc":
             tasks = sorted(tasks, key=lambda task: task.index, reverse=True)
+            
+        elif sort == "priority":
+            priority_order = {
+                "high" :3,
+                "medium": 2,
+                "low": 1
+            }
+            tasks = sorted(tasks, key=lambda task: priority_order.get(task.priority, 0), reverse=True)
         
         return list(tasks)
             

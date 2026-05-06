@@ -116,3 +116,15 @@ def test_keyword_empty(tmp_path):
     
     assert len(tasks) == 1
         
+def test_get_tasks_sort_by_priority(tmp_path):
+    manager = TodoManager(file_path=str(tmp_path/"todo.json"))
+    
+    manager.add_task("task1", priority="low")
+    manager.add_task("task2", priority="medium")
+    manager.add_task("task3", priority="high")
+    
+    tasks = manager.get_tasks(sort="priority")
+    
+    assert tasks[0].priority == "high"
+    assert tasks[1].priority == "medium"
+    assert tasks[2].priority == "low"

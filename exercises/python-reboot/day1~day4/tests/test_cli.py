@@ -48,3 +48,21 @@ def test_cli_add_with_priority_and_list(tmp_path, capsys):
     
     assert "study" in captured.out
     assert "(high)" in captured.out
+    
+def test_cli_sort_by_priority(tmp_path, capsys):
+    file_path = tmp_path/ "todo.json"
+    
+    sys.argv = ["todo.py", "--file", str(file_path), "add", "task1", "--priority", "low"]
+    main()
+    
+    sys.argv = ["todo.py", "--file", str(file_path), "add", "task2", "--priority", "high"]
+    main()
+    
+    sys.argv = ["todo.py", "--file", str(file_path), "list", "--sort", "priority"]
+    main()
+    
+    captured = capsys.readouterr()
+    
+    task_lines = [line for line in captured.out.splitlines() if "[ ]" in line]
+    assert "task2" in task_lines[0]
+        
