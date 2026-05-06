@@ -8,14 +8,17 @@ class TodoManager:
         self.tasks: List[Task] = []
         self.load_tasks()
         
-    def add_task(self, title):
+    def add_task(self, title, priority = "medium"):
         index = len(self.tasks)
-        task = Task(index = index, title=title)
+        task = Task(index = index, title=title, priority=priority)
         self.tasks.append(task)
         self.save_tasks()
 
-    def get_tasks(self, undone: bool = False, done: bool = False, sort = None, keyword=None):
+    def get_tasks(self, undone: bool = False, done: bool = False, keyword=None,priority = None, sort = None):
         tasks = self.tasks
+        if priority:
+            tasks = filter(lambda task: task.priority == priority, tasks)
+            
         if undone:
             tasks = filter(lambda task: not task.done, tasks)
             
@@ -85,18 +88,3 @@ class TodoManager:
     def reindex_tasks(self):
         for i, task in enumerate(self.tasks):
             task.index = i
-    
-    # def list_tasks_sorted_by_index(self):
-    #    return sorted(self.tasks, key=lambda task: task.index)
-    
-    # def list_tasks_sorted_desc(self):
-    #     return sorted(self.tasks, key=lambda task: task.index, reverse= True)
-    
-    # def list_undone_tasks(self):
-    #     return list(filter(lambda task: not task.done, self.tasks))
-    
-    # def list_undone_sorted(self):
-    #     return sorted(filter(lambda task: not task.done, self.tasks ), key = lambda task: task.index)
-    
-    # def get_done_tasks_sorted_desc(self):
-    #     return sorted(filter(lambda task: task.done, self.tasks), key=lambda task:task.index, reverse= True)

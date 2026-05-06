@@ -14,8 +14,10 @@ def create_parser():
     
     add_parser = subparsers.add_parser("add", help="Add a new task")
     add_parser.add_argument("title", type=str, help="Task title")
+    add_parser.add_argument("--priority", choices=["high","medium","low"],default="medium")
 
     list_parser = subparsers.add_parser("list", help="List all tasks")
+    list_parser.add_argument("--priority", choices=["high","medium","low"])
     list_parser.add_argument("--undone", action="store_true")
     list_parser.add_argument("--sort", choices=["asc", "desc"])
     list_parser.add_argument("--done", action="store_true")
@@ -33,9 +35,9 @@ def handle_list(manager, args):
     if args.done and args.undone:
         print("--done と --undone は同時に指定できません") 
         return
-    tasks = manager.get_tasks(undone=args.undone, done=args.done, sort=args.sort, keyword=args.keyword)  
+    tasks = manager.get_tasks(priority=args.priority, undone=args.undone, done=args.done, sort=args.sort, keyword=args.keyword)  
     if not tasks:
-        if args.keyword:
+        if args.priority or args.keyword:
             print("条件に一致するタスクはありません")
         elif args.undone:
             print("未完了のタスクはありません") 
@@ -61,7 +63,7 @@ def handle_remove(manager, args):
         print(f"その番号のタスクはありません: {args.index}")
             
 def handle_add(manager, args):
-    manager.add_task(args.title)
+    manager.add_task(args.title, priority = args.priority)
     print("タスクを追加しました")
 
 def main():

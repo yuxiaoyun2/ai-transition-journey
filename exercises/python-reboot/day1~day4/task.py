@@ -1,10 +1,16 @@
 from dataclasses import dataclass, asdict
+VALID_PRIORITIES = ["high", "medium", "low"]
 @dataclass
 class Task:
     index: int
     title: str
     done: bool = False
+    priority:str = "medium"
     
+    def __post_init__(self):
+        if self.priority not in VALID_PRIORITIES:
+            raise ValueError("invalid priority")
+        
     def to_dict(self):
         return asdict(self)
     
@@ -23,14 +29,19 @@ class Task:
             
         done = bool(data.get("done", False))
         
+        priority = data.get("priority", "medium")
+        if priority not in VALID_PRIORITIES:
+            priority = "medium"
+        
         return cls(
             index=fixed_index,
             title=data["title"],
-            done=done
+            done=done,
+            priority = priority
         )
         
     def display(self) -> str:
-        return f"{self.index + 1}. [{'x' if self.done else ' '}] {self.title}"
+        return f"{self.index + 1}. [{'x' if self.done else ' '}] {self.title} ({self.priority})"
     
-    def done_task(self):
+    def mark_done(self):
         self.done = True

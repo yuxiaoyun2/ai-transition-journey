@@ -1,13 +1,14 @@
 from todo_manager import TodoManager
 import pytest
 
-def test_add_task(tmp_path):
+def test_add_task_with_priority(tmp_path):
     manager = TodoManager(file_path=str(tmp_path/"test.json"))
     
-    manager.add_task("study")
+    manager.add_task("study", priority = "high")
     
     tasks = manager.get_tasks()
     
+    assert tasks[0].priority == "high"
     assert len(tasks) == 1
     assert tasks[0].title == "study"
     assert tasks[0].done is False
@@ -50,6 +51,17 @@ def test_get_tasks_undone(tmp_path):
     assert len(tasks) == 1
     assert tasks[0].title == "sleep"
     assert tasks[0].done is False
+    
+def test_get_tasks_priority(tmp_path):
+    manager = TodoManager(file_path=str(tmp_path/"test.json"))
+    
+    manager.add_task("study", priority="low")
+    manager.add_task("sleep")
+    
+    tasks = manager.get_tasks(priority="low")
+    
+    assert len(tasks) == 1
+    assert tasks[0].priority == "low"
     
 def test_get_tasks_sort_desc(tmp_path):
     manager = TodoManager(file_path=str(tmp_path/"test.json"))

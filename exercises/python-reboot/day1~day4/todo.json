@@ -2,21 +2,31 @@
   {
     "index": 0,
     "title": "买菜",
-    "done": false
+    "done": false,
+    "priority": "normal"
   },
   {
     "index": 1,
     "title": "学习Python",
-    "done": false
+    "done": false,
+    "priority": "normal"
   },
   {
     "index": 2,
     "title": "错误index",
-    "done": true
+    "done": true,
+    "priority": "normal"
   },
   {
     "index": 3,
     "title": "word",
-    "done": false
+    "done": false,
+    "priority": "normal"
+  },
+  {
+    "index": 4,
+    "title": "study",
+    "done": false,
+    "priority": "high"
   }
 ]
