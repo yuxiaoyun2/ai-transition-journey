@@ -40,7 +40,15 @@ class TodoManager:
                 "medium": 2,
                 "low": 1
             }
-            tasks = sorted(tasks, key=lambda task: priority_order.get(task.priority, 0), reverse=True)
+            tasks = sorted(tasks, key=lambda task: (-priority_order.get(task.priority, 0), task.index))
+            
+        elif sort == "smart":
+            priority_order = {
+                "high": 3,
+                "medium": 2,
+                "low": 1
+            }
+            tasks = sorted(tasks, key=lambda task: (task.done, -priority_order.get(task.priority,0), task.index))
         
         return list(tasks)
             

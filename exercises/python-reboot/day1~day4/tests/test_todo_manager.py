@@ -128,3 +128,35 @@ def test_get_tasks_sort_by_priority(tmp_path):
     assert tasks[0].priority == "high"
     assert tasks[1].priority == "medium"
     assert tasks[2].priority == "low"
+    
+def test_get_tasks_sort_by_priority_then_index(tmp_path):
+    manager = TodoManager(file_path=str(tmp_path/"test.json"))
+    
+    manager.add_task("task1", priority="high")
+    manager.add_task("task2", priority="low")
+    manager.add_task("task3", priority="high")
+    
+    tasks = manager.get_tasks(sort="priority")
+    
+    titles= [t.title for t in tasks]
+    
+    assert titles == ["task1", "task3","task2"]
+    
+    
+def test_get_tasks_sort_by_status_priority_index(tmp_path):
+    manager = TodoManager(file_path=str(tmp_path/"test.json"))
+    
+    manager.add_task("task1", priority="low") #undone, low, index 0
+    manager.add_task("task2", priority="high") #undone, high, index 1
+    manager.add_task("task3", priority="high") #done, high, index 2
+    manager.add_task("task4", priority="medium") #undone, medium, index 3
+    
+    manager.mark_done(2)
+    
+    tasks = manager.get_tasks(sort="smart")
+    
+    titles = [task.title for task in tasks]
+
+    assert titles == ["task2", "task4", "task1", "task3"]
+    
+    

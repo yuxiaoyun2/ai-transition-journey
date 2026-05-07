@@ -19,7 +19,7 @@ def create_parser():
     list_parser = subparsers.add_parser("list", help="List all tasks")
     list_parser.add_argument("--priority", choices=["high","medium","low"])
     list_parser.add_argument("--undone", action="store_true")
-    list_parser.add_argument("--sort", choices=["asc", "desc", "priority"])
+    list_parser.add_argument("--sort", choices=["asc", "desc", "priority", "smart"])
     list_parser.add_argument("--done", action="store_true")
     list_parser.add_argument("--keyword", type=str)
 
