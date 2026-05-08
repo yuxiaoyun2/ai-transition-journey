@@ -1,0 +1,22 @@
+[
+  "tests/test_cli.py::test_cli_add_and_list",
+  "tests/test_cli.py::test_cli_add_with_priority_and_list",
+  "tests/test_cli.py::test_cli_invalid_priority",
+  "tests/test_cli.py::test_cli_list_empty",
+  "tests/test_cli.py::test_cli_list_grouped",
+  "tests/test_cli.py::test_cli_sort_by_priority",
+  "tests/test_todo_manager.py::test_add_task",
+  "tests/test_todo_manager.py::test_add_task_with_priority",
+  "tests/test_todo_manager.py::test_get_tasks_keyword",
+  "tests/test_todo_manager.py::test_get_tasks_priority",
+  "tests/test_todo_manager.py::test_get_tasks_sort_by_priority",
+  "tests/test_todo_manager.py::test_get_tasks_sort_by_priority_then_index",
+  "tests/test_todo_manager.py::test_get_tasks_sort_by_status_priority_index",
+  "tests/test_todo_manager.py::test_get_tasks_sort_desc",
+  "tests/test_todo_manager.py::test_get_tasks_undone",
+  "tests/test_todo_manager.py::test_keyword_empty",
+  "tests/test_todo_manager.py::test_mark_done",
+  "tests/test_todo_manager.py::test_mark_done_invalid_index",
+  "tests/test_todo_manager.py::test_remove_invalid_index",
+  "tests/test_todo_manager.py::test_remove_task_by_index"
+]
