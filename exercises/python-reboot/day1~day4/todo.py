@@ -29,6 +29,10 @@ def create_parser():
     remove_parser = subparsers.add_parser("remove", help="Remove a task")
     remove_parser.add_argument("index", type=int, help="Task index")
     
+    edit_parser = subparsers.add_parser("edit", help="Edit a task")
+    edit_parser.add_argument("index", type=int, help="Task index")
+    edit_parser.add_argument("title", type=str, help="Task new title")
+    
     return parser
     
 def handle_list(manager, args):
@@ -68,6 +72,13 @@ def handle_add(manager, args):
     manager.add_task(args.title, priority = args.priority)
     print("タスクを追加しました")
 
+def handle_edit(manager, args):
+    try:
+        manager.edit_task(index = args.index-1, new_title = args.title)
+        print("タスクを更新しました")
+    except ValueError:
+        print("タスクのタイトルは存在しません")
+    
 def main():
     
     parser = create_parser()
@@ -88,6 +99,8 @@ def main():
     elif args.command == "remove":
         handle_remove(manager, args)
             
+    elif args.command == "edit":
+        handle_edit(manager, args)
     else:
         parser.print_help()
     
@@ -100,7 +113,7 @@ def print_grouped_tasks(tasks:list[Task]):
         print(f"[未完了]({len(undone_task)})")
         print_tasks(undone_task)
     if done_task:
-        print(f"[\n[完了]({len(done_task)})") 
+        print(f"\n[完了]({len(done_task)})") 
         print_tasks(done_task)
     print(f"\n合計: {len(tasks)}")
 

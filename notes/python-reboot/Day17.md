@@ -69,6 +69,6 @@ def print_grouped_tasks(tasks: list[Task]):
 
 ---
 
-### Day16 一句话总结
+### Day17 一句话总结
 
 👉 CLI 输出就是产品界面

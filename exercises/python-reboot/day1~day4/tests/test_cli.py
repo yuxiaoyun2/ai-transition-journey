@@ -86,5 +86,21 @@ def test_cli_list_grouped(tmp_path, capsys):
     assert "[未完了]" in captured.out
     assert "[完了]" in captured.out
     
+def test_cli_edit_task(tmp_path, capsys):
+    file_path = tmp_path/"todo.json"
     
+    sys.argv = ["todo.py", "--file", str(file_path), "add","task1"]
+    main()
     
+    sys.argv = ["todo.py", "--file", str(file_path), "add", "task2"]
+    main()
+    
+    sys.argv = ["todo.py", "--file", str(file_path), "edit", "1", "new title"]
+    main()
+    
+    sys.argv = ["todo.py", "--file", str(file_path), "list"]
+    main()
+    
+    captured = capsys.readouterr()
+    
+    assert "new title" in captured.out

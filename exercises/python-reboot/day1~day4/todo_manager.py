@@ -104,3 +104,22 @@ class TodoManager:
     def reindex_tasks(self):
         for i, task in enumerate(self.tasks):
             task.index = i
+            
+    def edit_task(self, index:int, new_title: str):
+        for task in self.tasks:
+            if task.index == index:
+                task.title = self.update_title(task.title, new_title)
+                self.save_tasks()
+                return task
+                    
+        raise ValueError("任务不存在")
+            
+    def update_title(self, old_title:str, new_title:str):
+        new_title = new_title.strip()
+        if not new_title:
+            raise ValueError("标题不能为空")
+        
+        if new_title == old_title.strip():
+            return old_title
+        
+        return new_title
