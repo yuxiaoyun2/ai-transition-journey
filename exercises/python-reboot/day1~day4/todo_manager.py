@@ -105,10 +105,15 @@ class TodoManager:
         for i, task in enumerate(self.tasks):
             task.index = i
             
-    def edit_task(self, index:int, new_title: str):
+    def edit_task(self, index:int, new_title: str = None, new_priority: str = None):
+        if new_title is None and new_priority is None:
+            raise ValueError("至少更新一个字段")
         for task in self.tasks:
             if task.index == index:
-                task.title = self.update_title(task.title, new_title)
+                if new_title is not None:
+                    task.title = self.update_title(task.title, new_title)
+                if new_priority is not None:
+                    task.priority = self.update_priority(task.priority, new_priority)
                 self.save_tasks()
                 return task
                     
@@ -123,3 +128,12 @@ class TodoManager:
             return old_title
         
         return new_title
+    
+    def update_priority(self, old_priority:str = None, new_priority:str = None):
+        if not new_priority or new_priority == old_priority:
+            return old_priority
+        
+        if new_priority not in ["high","mediem","low"]:
+            raise ValueError("优先级必须在[‘high’,‘mediem’,‘low’]中")
+        
+        return new_priority

@@ -31,7 +31,8 @@ def create_parser():
     
     edit_parser = subparsers.add_parser("edit", help="Edit a task")
     edit_parser.add_argument("index", type=int, help="Task index")
-    edit_parser.add_argument("title", type=str, help="Task new title")
+    edit_parser.add_argument("--title", type=str, help="Task new title")
+    edit_parser.add_argument("--priority", type=str, choices=["high","mediem","low"], help="Task priority")
     
     return parser
     
@@ -74,10 +75,11 @@ def handle_add(manager, args):
 
 def handle_edit(manager, args):
     try:
-        manager.edit_task(index = args.index-1, new_title = args.title)
+        task = manager.edit_task(index = args.index-1, new_title = args.title, new_priority = args.priority)
         print("タスクを更新しました")
-    except ValueError:
-        print("タスクのタイトルは存在しません")
+        print(task.display())
+    except ValueError as e:
+        print(e)
     
 def main():
     
