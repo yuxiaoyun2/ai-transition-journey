@@ -75,9 +75,12 @@ def handle_add(manager, args):
 
 def handle_edit(manager, args):
     try:
-        task = manager.edit_task(index = args.index-1, new_title = args.title, new_priority = args.priority)
-        print("タスクを更新しました")
-        print(task.display())
+        if args.title is None and args.priority is None:
+            handle_edit_interactive(manager,args)
+        else:
+            task = manager.edit_task(index = args.index-1, title = args.title, priority = args.priority)
+            print("タスクを更新しました")
+            print(task.display())
     except ValueError as e:
         print(e)
     
@@ -119,6 +122,29 @@ def print_grouped_tasks(tasks:list[Task]):
         print_tasks(done_task)
     print(f"\n合計: {len(tasks)}")
 
+def handle_edit_interactive(manager, args):
+    task = manager.get_task_by_index(args.index - 1)
+    
+    if not task:
+        print("任务不存在")
+        return
+        
+    print(f"当前标题: {task.title}")
+    new_title = input("新标题（回车跳过）: ")
+    
+    print(f"当前优先级: {task.priority}")
+    new_priority = input("新优先级（high/medium/low，回车跳过）: ")
+    
+    title = new_title.strip() if new_title.strip() else None
+    priority = new_priority.strip() if new_priority.strip() else None
+    
+    if title is None and priority is None:
+        raise ValueError("没有修改任何内容")
+    
+    task = manager.edit_task(index = args.index -1, title = title, priority = priority)
+    
+    print("タスクを更新しました")
+    print(task.display())
 
 if __name__ == "__main__":
     main()

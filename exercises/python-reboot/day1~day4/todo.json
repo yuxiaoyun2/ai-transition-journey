@@ -1,9 +1,9 @@
 [
   {
     "index": 0,
-    "title": "买菜",
+    "title": "aa",
     "done": false,
-    "priority": "medium"
+    "priority": "high"
   },
   {
     "index": 1,
@@ -28,5 +28,11 @@
     "title": "study",
     "done": false,
     "priority": "high"
+  },
+  {
+    "index": 5,
+    "title": "test\n",
+    "done": false,
+    "priority": "medium"
   }
 ]
