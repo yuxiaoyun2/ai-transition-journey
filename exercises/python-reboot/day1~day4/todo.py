@@ -13,7 +13,7 @@ def create_parser():
     subparsers.required = True
     
     add_parser = subparsers.add_parser("add", help="Add a new task")
-    add_parser.add_argument("title", type=str, help="Task title")
+    add_parser.add_argument("--title", type=str, help="Task title")
     add_parser.add_argument("--priority", choices=["high","medium","low"],default="medium")
 
     list_parser = subparsers.add_parser("list", help="List all tasks")
@@ -32,7 +32,7 @@ def create_parser():
     edit_parser = subparsers.add_parser("edit", help="Edit a task")
     edit_parser.add_argument("index", type=int, help="Task index")
     edit_parser.add_argument("--title", type=str, help="Task new title")
-    edit_parser.add_argument("--priority", type=str, choices=["high","mediem","low"], help="Task priority")
+    edit_parser.add_argument("--priority", type=str, choices=["high","medium","low"], help="Task priority")
     
     return parser
     
@@ -40,8 +40,8 @@ def handle_list(manager, args):
     if args.done and args.undone:
         print("--done と --undone は同時に指定できません") 
         return
-    tasks = manager.get_tasks(priority=args.priority, undone=args.undone, done=args.done, sort=args.sort, keyword=args.keyword)  
-    if not tasks:
+    filtered_tasks = manager.get_tasks(priority=args.priority, undone=args.undone, done=args.done, sort=args.sort, keyword=args.keyword)  
+    if not filtered_tasks:
         if args.priority or args.keyword:
             print("条件に一致するタスクはありません")
         elif args.undone:
@@ -51,9 +51,38 @@ def handle_list(manager, args):
         else:
             print("タスクはありません")
         return
-    print_grouped_tasks(tasks)
+    print_grouped_tasks(filtered_tasks)
+    
+    while True:
+        action = prompt_action()
+        if action in  ["1","2","3"]:
+            break
+    
+    if action == "1":
+        index = get_valid_index(len(filtered_tasks))
+        task = filtered_tasks[index]
+        manager.mark_done(task.index)
+        print(f"任务已标记完成: {task.title}\n")
         
+    elif action == "2":
+        index = get_valid_index(len(filtered_tasks))
+        task = filtered_tasks[index]
+        manager.remove_task_by_index(task.index)
+        print(f"任务已删除: {task.title}\n")
         
+    elif action == "3":
+        print("退出操作")
+        return
+        
+def prompt_action():
+    print("\n👉 请选择操作:")
+    print("1. 标记完成")
+    print("2. 删除任务")
+    print("3. 退出")
+    
+    return input("输入选项: ").strip()
+
+     
     
 def handle_done(manager, args):
     try:
@@ -70,7 +99,20 @@ def handle_remove(manager, args):
         print(f"その番号のタスクはありません: {args.index}")
             
 def handle_add(manager, args):
-    manager.add_task(args.title, priority = args.priority)
+    if args.title:
+        title = args.title
+            
+    else:
+        while True:
+            title = input("请输入任务标题: ").strip()
+            if title != "":
+                break
+            else:
+                print("标题不能为空")
+            
+    priority = get_valid_input("优先级", ["high", "medium", "low"])
+        
+    manager.add_task(title = title, priority= priority)
     print("タスクを追加しました")
 
 def handle_edit(manager, args):
@@ -145,6 +187,30 @@ def handle_edit_interactive(manager, args):
     
     print("タスクを更新しました")
     print(task.display())
+
+def get_valid_input(prompt: str, valid_options: list[str]) -> str:
+    while True:
+        value = input(f"{prompt}({'/'.join(valid_options)}): ").strip().lower()
+        
+        if value in valid_options:
+            return value
+        
+        print("输入有误，请重新输入")
+        
+def get_valid_index(max_index: int) -> int:
+    while True:
+        value = input(f"请输入任务编号 (1 ~ {max_index}): ").strip()
+        
+        if not value.isdigit():
+            print("❌ 必须输入数字")
+            continue
+        
+        index = int(value)
+        
+        if 0<index <= max_index:
+            return index-1
+        
+        print("❌ 编号超出范围")  
 
 if __name__ == "__main__":
     main()
