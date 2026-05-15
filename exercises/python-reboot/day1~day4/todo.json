@@ -20,25 +20,19 @@
   {
     "index": 3,
     "title": "word",
-    "done": false,
+    "done": true,
     "priority": "medium"
   },
   {
     "index": 4,
     "title": "study",
-    "done": false,
+    "done": true,
     "priority": "high"
   },
   {
     "index": 5,
     "title": "test\n",
-    "done": false,
-    "priority": "medium"
-  },
-  {
-    "index": 6,
-    "title": "new title",
     "done": true,
-    "priority": "low"
+    "priority": "medium"
   }
 ]

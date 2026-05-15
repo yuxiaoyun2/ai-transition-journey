@@ -40,40 +40,50 @@ def handle_list(manager, args):
     if args.done and args.undone:
         print("--done と --undone は同時に指定できません") 
         return
-    filtered_tasks = manager.get_tasks(priority=args.priority, undone=args.undone, done=args.done, sort=args.sort, keyword=args.keyword)  
-    if not filtered_tasks:
-        if args.priority or args.keyword:
-            print("条件に一致するタスクはありません")
-        elif args.undone:
-            print("未完了のタスクはありません") 
-        elif args.done:
-            print("完了したタスクはありません")
-        else:
-            print("タスクはありません")
-        return
-    print_grouped_tasks(filtered_tasks)
     
     while True:
+        filtered_tasks = filter_tasks(manager, args)
+        
+        if not filtered_tasks:
+            print_empty_message(args)
+            return
+        
+        print_grouped_tasks(filtered_tasks)
         action = prompt_action()
-        if action in  ["1","2","3"]:
+        
+        if action == "1":
+            task = select_task(filtered_tasks)
+            manager.mark_done(task.index)
+            print(f"任务已标记完成: {task.title}\n")
+        
+        elif action == "2":
+            task = select_task(filtered_tasks)
+            manager.remove_task_by_index(task.index)
+            print(f"任务已删除: {task.title}\n")
+        
+        elif action == "3":
+            print("退出操作")
             break
-    
-    if action == "1":
-        index = get_valid_index(len(filtered_tasks))
-        task = filtered_tasks[index]
-        manager.mark_done(task.index)
-        print(f"任务已标记完成: {task.title}\n")
+        else:
+            print("无效选项，请重新输入")
+
+def select_task(tasks):
+    index = get_valid_index(len(tasks))
+    return tasks[index]
         
-    elif action == "2":
-        index = get_valid_index(len(filtered_tasks))
-        task = filtered_tasks[index]
-        manager.remove_task_by_index(task.index)
-        print(f"任务已删除: {task.title}\n")
-        
-    elif action == "3":
-        print("退出操作")
-        return
-        
+def filter_tasks(manager, args):
+    return manager.get_tasks(priority=args.priority, undone=args.undone, done=args.done, sort=args.sort, keyword=args.keyword)  
+
+def print_empty_message(args):
+    if args.priority or args.keyword:
+        print("条件に一致するタスクはありません")
+    elif args.undone:
+        print("未完了のタスクはありません") 
+    elif args.done:
+        print("完了したタスクはありません")
+    else:
+        print("タスクはありません")
+
 def prompt_action():
     print("\n👉 请选择操作:")
     print("1. 标记完成")
@@ -82,8 +92,6 @@ def prompt_action():
     
     return input("输入选项: ").strip()
 
-     
-    
 def handle_done(manager, args):
     try:
         manager.mark_done(args.index - 1)
