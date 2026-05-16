@@ -13,6 +13,7 @@ class TodoManager:
         task = Task(index = index, title=title, priority=priority)
         self.tasks.append(task)
         self.save_tasks()
+        self.log_info(f"任务添加: {task.title}")
 
     def get_tasks(self, undone: bool = False, done: bool = False, keyword=None,priority = None, sort = None):
         tasks = self.tasks
@@ -56,6 +57,7 @@ class TodoManager:
         if 0 <= index < len(self.tasks):
             self.tasks[index].done = True
             self.save_tasks()
+            self.log_info(f"任务完成: {self.tasks[index].title}")
             return self.tasks[index]
         
         raise ValueError("task not found")
@@ -66,6 +68,7 @@ class TodoManager:
             task = self.tasks.pop(index)
             self.reindex_tasks()
             self.save_tasks()
+            self.log_info(f"任务删除: {task.title}")
             return task
             
         raise ValueError("task not found")
@@ -141,3 +144,9 @@ class TodoManager:
             if task.index == index:
                 return task
         return None
+    
+    def log_info(self, msg):
+        print(f"[INFO] {msg}")
+        
+    def log_error(self, msg):
+        print(f"[ERROR] {msg}")
