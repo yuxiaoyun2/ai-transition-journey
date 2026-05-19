@@ -2,6 +2,17 @@ from task import Task
 from typing import List
 import json
 import os
+import logging
+
+logging.basicConfig(
+    filename="todo.log",
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
+    encoding="utf-8"
+)
+
+logger = logging.getLogger(__name__)
+
 class TodoManager:
     def __init__(self, file_path: str = "todo.json"):
         self.file_path = file_path
@@ -13,7 +24,9 @@ class TodoManager:
         task = Task(index = index, title=title, priority=priority)
         self.tasks.append(task)
         self.save_tasks()
-        self.log_info(f"任务添加: {task.title}")
+        logger.info(f"task added: {task.title}")
+        logger.debug("debug message")
+        
 
     def get_tasks(self, undone: bool = False, done: bool = False, keyword=None,priority = None, sort = None):
         tasks = self.tasks
@@ -57,9 +70,10 @@ class TodoManager:
         if 0 <= index < len(self.tasks):
             self.tasks[index].done = True
             self.save_tasks()
-            self.log_info(f"任务完成: {self.tasks[index].title}")
+            logger.info(f"task done: {self.tasks[index].title}")
             return self.tasks[index]
         
+        logger.error(f"mark_done failed: index={index}")
         raise ValueError("task not found")
                 
                 
@@ -68,9 +82,10 @@ class TodoManager:
             task = self.tasks.pop(index)
             self.reindex_tasks()
             self.save_tasks()
-            self.log_info(f"任务删除: {task.title}")
+            logger.info(f"task deleted: {task.title}")
             return task
             
+        logger.error(f"remove_task failed: index={index}")
         raise ValueError("task not found")
         
     def total_list(self) -> int:
@@ -144,9 +159,3 @@ class TodoManager:
             if task.index == index:
                 return task
         return None
-    
-    def log_info(self, msg):
-        print(f"[INFO] {msg}")
-        
-    def log_error(self, msg):
-        print(f"[ERROR] {msg}")

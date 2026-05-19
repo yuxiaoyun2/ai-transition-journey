@@ -98,7 +98,6 @@ def handle_done(manager, args):
         print("タスクを完了しました")
     except ValueError:
         print(f"その番号のタスクはありません: {args.index}")
-        manager.log_error(f"mark_done failed: index={args.index}")
         
 def handle_remove(manager, args):
     try:
@@ -106,7 +105,7 @@ def handle_remove(manager, args):
         print("タスクを削除しました")
     except ValueError:
         print(f"その番号のタスクはありません: {args.index}")
-        manager.log_error(f"remove_task failed: index={args.index}")
+        
             
 def handle_add(manager, args):
     if args.title:
@@ -135,7 +134,7 @@ def handle_edit(manager, args):
             print(task.display())
     except ValueError as e:
         print(e)
-        manager.log_error(f"edit_task failed: {e}")
+        
     
 def main():
     
