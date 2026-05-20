@@ -8,7 +8,8 @@ A lightweight command-line task management tool built with Python.
 
 ## 🚀 Overview
 
-This project is a simple yet structured CLI application that allows users to manage daily tasks directly from the terminal.
+This project is a simple yet structured CLI application
+designed to practice clean architecture and Python backend fundamentals.
 
 It demonstrates:
 
@@ -38,11 +39,21 @@ todo-cli/
 ├── todo.py            # CLI entry point
 ├── todo_manager.py    # Business logic layer
 ├── task.py            # Task model
-├── todo.json          # Local data storage
+├── todo.json.example  # Example data
 ├── todo.log           # Log file
 │
 ├── README.md
 └── .gitignore
+```
+
+---
+
+## 📦 Setup
+
+Copy the example data file:
+
+```bash
+cp todo.json.example todo.json
 ```
 
 ---
@@ -89,7 +100,7 @@ python todo.py add --title "Buy milk"
 python todo.py list
 ```
 
-Output:
+Output(Japanese UI):
 
 ```
 === 未完了 (2) ===
@@ -135,4 +146,4 @@ Example:
 
 ## 👤 Author
 
-YOYO Tokyo Reboot Project 🚀
+YOYO | Tokyo Reboot Project 🚀
