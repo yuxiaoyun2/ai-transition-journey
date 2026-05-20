@@ -119,8 +119,8 @@ Logs are automatically written to `todo.log`.
 Example:
 
 ```
-2026-xx-xx 12:00:00 [INFO] task added: Study Python
-2026-xx-xx 12:01:00 [ERROR] mark_done failed: index=10
+2026-xx-xx 12:00:00 [INFO] [todo_manager] task added: Study Python
+2026-xx-xx 12:01:00 [ERROR] [todo_manager] mark_done failed: index=10
 ```
 
 ---
