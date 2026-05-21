@@ -114,13 +114,15 @@ Output(Japanese UI):
 
 ## 🪵 Logging
 
-Logs are automatically written to `todo.log`.
+Logs are automatically written to `todo.log` using Python's `logging` module.
+
+The logging system is configured with multiple levels (DEBUG / INFO / ERROR) and includes timestamps and module names for better traceability.
 
 Example:
 
 ```
-2026-xx-xx 12:00:00 [INFO] [todo_manager] task added: Study Python
-2026-xx-xx 12:01:00 [ERROR] [todo_manager] mark_done failed: index=10
+2026-01-01 12:00:00 [INFO] [todo_manager] task added: Study Python
+2026-01-01  12:01:00 [ERROR] [todo_manager] mark_done failed: index=10
 ```
 
 ---
