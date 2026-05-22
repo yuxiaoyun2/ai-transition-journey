@@ -2,7 +2,7 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 
 @dataclass
-class memo:
+class Memo:
     index: int
     title: str
     content: str
