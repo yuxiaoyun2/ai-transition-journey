@@ -34,8 +34,13 @@ class MemoManager:
         return memo
         
     def delete_memo(self, index: int):
+        memo = self.search_memo(index)
+        if not memo:
+            return None
+        
         self.memos = [memo for memo in self.memos if memo.index != index]
         self.save_memo()
+        return memo
     
     def edit_memo(self, index: int, title: str = None, content: str = None) -> Optional[Memo]:
         memo = self.search_memo(index)
