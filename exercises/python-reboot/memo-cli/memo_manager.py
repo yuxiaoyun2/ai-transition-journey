@@ -55,11 +55,18 @@ class MemoManager:
         self.save_memo()
         return memo
     
-    def search_memo(self, index: int) -> Optional[Memo]:
+    def search_memo(self, index: int = None, keyword: str = None) -> list[Memo]:
+        result = []
         for memo in self.memos:
-            if index == memo.index:
-                return memo
-        return None
+            if index is not None and index != memo.index:
+                continue
+            
+            if keyword is not None:
+                if keyword not in memo.title and keyword not in memo.content:
+                    continue
+                
+            result.append(memo)
+        return result     
         
     def list_memo(self):
         return self.memos
