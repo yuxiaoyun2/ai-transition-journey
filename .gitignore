@@ -13,3 +13,6 @@ todo.json
 
 #logs
 *.log
+
+#.env
+ai-playground/.env
