@@ -1,33 +1,52 @@
-from openai import OpenAI
+
 import os
 from dotenv import load_dotenv
+import argparse
+from config import ROLES
+from chat_manager import ChatManager
+from ai_client import AIClient
 
-load_dotenv()
+def create_parser():
+    parser = argparse.ArgumentParser(description="AI CLI")
+    parser.add_argument("--role", default="default", choices=ROLES.keys())
+    return parser
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-messages = []
-
-while True:
+def main():
+    parser = create_parser()
+    args = parser.parse_args()
+    role_key = args.role
     
-    if len(messages) > 10:
-        messages.pop(0)
+    system_prompt = ROLES.get(role_key, ROLES["default"])
+    
+    load_dotenv()
+    
+    api_key = os.getenv("OPENAI_API_KEY")
+    
+    if not api_key:
+        print("OPENAI_API_KEY が設定されていません")
+        return
+
+    chat_manager = ChatManager(system_prompt)
+    ai_client = AIClient(api_key)
+    
+    while True:
+    
+        chat_manager.trim_messages()
         
-    question = input("you: ")
+        question = input("you: ")
     
-    if question=="exit":
-        print("終了します")
-        break
+        if question=="exit":
+            print("終了します")
+            break
     
-    messages.append({"role": "user", "content": question})
+        chat_manager.add_user_message(question)
     
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=messages
-    )
+        ai_answer = ai_client.chat(messages=chat_manager.get_messages())
+        print("AI: ",ai_answer)
     
-    ai_answer = response.choices[0].message.content
-    print("AI: ",ai_answer)
+        chat_manager.add_ai_message(ai_answer)
     
-    messages.append({"role": "assistant", "content": ai_answer})
     
+if __name__ == "__main__":
+    main()
