@@ -5,6 +5,7 @@ import argparse
 from config import ROLES
 from chat_manager import ChatManager
 from ai_client import AIClient
+from storage import ChatStorage
 
 def create_parser():
     parser = argparse.ArgumentParser(description="AI CLI")
@@ -27,8 +28,11 @@ def main():
         print("OPENAI_API_KEY が設定されていません")
         return
 
-    chat_manager = ChatManager(system_prompt)
+    storage = ChatStorage()
+    chat_manager = ChatManager(system_prompt, storage)
     ai_client = AIClient(api_key)
+    
+    print("AI CLIを開始します。終了するには exit と入力してください。")
     
     while True:
     
@@ -37,7 +41,7 @@ def main():
         question = input("you: ")
     
         if question=="exit":
-            print("終了します")
+            print("保存して終了します")
             break
     
         chat_manager.add_user_message(question)

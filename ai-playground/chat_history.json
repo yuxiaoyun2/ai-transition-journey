@@ -1,0 +1,30 @@
+[
+  {
+    "role": "system",
+    "content": "你是一个有帮助的AI助手"
+  },
+  {
+    "role": "user",
+    "content": "hi"
+  },
+  {
+    "role": "assistant",
+    "content": "Hello! How can I assist you today?"
+  },
+  {
+    "role": "user",
+    "content": "i am yoyo"
+  },
+  {
+    "role": "assistant",
+    "content": "Nice to meet you, Yoyo! How can I help you today?"
+  },
+  {
+    "role": "user",
+    "content": "tell me my name"
+  },
+  {
+    "role": "assistant",
+    "content": "Your name is Yoyo! How can I assist you further, Yoyo?"
+  }
+]
