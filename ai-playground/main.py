@@ -39,10 +39,19 @@ def main():
         chat_manager.trim_messages()
         
         question = input("you: ")
-    
+        
         if question=="exit":
             print("保存して終了します")
             break
+        
+        if question=="/clear":
+            chat_manager.clear_messages()
+            print("会話履歴をクリアしました")
+            continue
+    
+        if question=="/history":
+            chat_manager.show_last_5_messages()
+            continue
     
         chat_manager.add_user_message(question)
     
