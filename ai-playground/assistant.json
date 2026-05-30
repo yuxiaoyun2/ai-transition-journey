@@ -1,0 +1,22 @@
+[
+  {
+    "role": "system",
+    "content": "你是一个有帮助的AI助手"
+  },
+  {
+    "role": "user",
+    "content": "hi"
+  },
+  {
+    "role": "assistant",
+    "content": "Hello! How can I assist you today?"
+  },
+  {
+    "role": "user",
+    "content": "who are you"
+  },
+  {
+    "role": "assistant",
+    "content": "I’m an AI assistant here to help you with information, answer questions, and provide support on a variety of topics. What can I help you with today?"
+  }
+]

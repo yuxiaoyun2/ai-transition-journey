@@ -1,0 +1,22 @@
+[
+  {
+    "role": "system",
+    "content": "你是一个有帮助的AI助手"
+  },
+  {
+    "role": "user",
+    "content": "hi"
+  },
+  {
+    "role": "assistant",
+    "content": "Hello! How can I assist you today?"
+  },
+  {
+    "role": "user",
+    "content": "bye"
+  },
+  {
+    "role": "assistant",
+    "content": "Goodbye! If you have any more questions in the future, feel free to ask. Have a great day!"
+  }
+]

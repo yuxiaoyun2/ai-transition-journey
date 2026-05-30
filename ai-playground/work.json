@@ -1,0 +1,14 @@
+[
+  {
+    "role": "system",
+    "content": "你是一个有帮助的AI助手"
+  },
+  {
+    "role": "user",
+    "content": "who are you"
+  },
+  {
+    "role": "assistant",
+    "content": "I am an AI language model created by OpenAI, designed to assist with a wide range of questions and tasks. My purpose is to provide information, answer queries, and help users with various topics. How can I assist you today?"
+  }
+]

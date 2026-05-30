@@ -2,8 +2,8 @@ import json
 import os
 
 class ChatStorage:
-    def __init__(self, file_path: str = "chat_history.json"):
-        self.file_path = file_path
+    def __init__(self, session: str = "default"):
+        self.file_path = f"{session}.json"
     
     def save(self, messages: list[dict]):
         with open(self.file_path, "w", encoding="utf-8") as f:
