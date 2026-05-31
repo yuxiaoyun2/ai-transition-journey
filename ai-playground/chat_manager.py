@@ -5,12 +5,7 @@ class ChatManager:
         self.storage = storage
         self.messages = self.storage.load()
         
-        if not self.messages:
-            self.messages = [
-                {"role": "system", "content": system_prompt}
-            ]
-            self.storage.save(messages= self.messages)
-        
+        self._ensure_single_system_message(system_prompt)
     
     def add_user_message(self, text: str):
         self.messages.append({"role": "user", "content": text})
@@ -64,4 +59,18 @@ class ChatManager:
         for msg in msgs:
             role = "you: " if msg["role"] == "user"  else "AI: "
             print(f"{role} {msg['content']}")
+        
+    def _ensure_single_system_message(self,system_prompt):
+        if self.messages:
+            msg = self.messages[0]
+            if msg.get("role") == "system" and msg.get("content") == system_prompt:
+                return
+        
+        self.messages = [
+            {
+                "role": "system",
+                "content": system_prompt
+            }
+        ]
+        self.storage.save(self.messages)
         

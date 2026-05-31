@@ -9,8 +9,9 @@ from storage import ChatStorage
 
 def create_parser():
     parser = argparse.ArgumentParser(description="AI CLI")
-    parser.add_argument("--role", default="default", choices=ROLES.keys())
+    parser.add_argument("--role", default="default", choices=list(ROLES.keys()))
     parser.add_argument("--session", type=str, default="default")
+    parser.add_argument("--list-sessions", action="store_true")
     return parser
 
 
@@ -20,21 +21,39 @@ def main():
     role_key = args.role
     session = args.session
     
+    if not session.strip():
+        print("session can't be empty (e.g. --session work)")
+        return
+    
+    storage = ChatStorage(session)
+    
+    if args.list_sessions:
+        sessions = storage.list_sessions()
+        
+        if not sessions:
+            print("まだ session はありません")
+            return
+        
+        print("have sessions: ")
+        for s in sessions:
+            print(f"- {s}")
+        return
+    
     system_prompt = ROLES.get(role_key, ROLES["default"])
     
     load_dotenv()
     
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("OPENAI_API_KEY")  
+    
+    chat_manager = ChatManager(system_prompt, storage)
+    ai_client = AIClient(api_key)
     
     if not api_key:
         print("OPENAI_API_KEY が設定されていません")
         return
-
-    storage = ChatStorage(session)
-    chat_manager = ChatManager(system_prompt, storage)
-    ai_client = AIClient(api_key)
     
     print(f"session: {session}")
+    print(f"role: {role_key}")
     print("AI CLIを開始します。終了するには exit と入力してください。")
     
     while True:

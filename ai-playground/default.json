@@ -10,13 +10,5 @@
   {
     "role": "assistant",
     "content": "Hello! How can I assist you today?"
-  },
-  {
-    "role": "user",
-    "content": "bye"
-  },
-  {
-    "role": "assistant",
-    "content": "Goodbye! If you have any more questions in the future, feel free to ask. Have a great day!"
   }
 ]
