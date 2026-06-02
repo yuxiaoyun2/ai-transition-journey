@@ -124,11 +124,9 @@ def main():
             
         chat_manager.add_user_message(question)
     
-        ai_answer = ai_client.chat(messages=chat_manager.get_messages())
-        print("AI: ",ai_answer)
-    
-        chat_manager.add_ai_message(ai_answer)
-    
+        print("AI: ", end="", flush=True)
+        reply = ai_client.stream_chat(messages=chat_manager.get_messages())
+        chat_manager.add_ai_message(reply)
     
 if __name__ == "__main__":
     main()
