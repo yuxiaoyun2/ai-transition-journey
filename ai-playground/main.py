@@ -45,12 +45,12 @@ def main():
     
     api_key = os.getenv("OPENAI_API_KEY")  
     
-    chat_manager = ChatManager(system_prompt, storage)
-    ai_client = AIClient(api_key)
-    
     if not api_key:
         print("OPENAI_API_KEY が設定されていません")
         return
+    
+    chat_manager = ChatManager(system_prompt, storage)
+    ai_client = AIClient(api_key)
     
     print(f"session: {session}")
     print(f"role: {role_key}")
@@ -61,20 +61,67 @@ def main():
         chat_manager.trim_messages()
         
         question = input("you: ")
+        if not question.strip():
+            continue
         
         if question=="exit":
             print("保存して終了します")
             break
         
-        if question=="/clear":
-            chat_manager.clear_messages()
-            print("会話履歴をクリアしました")
+        if question=="/reset":
+            chat_manager.reset_messages()
+            print("会話履歴をリセットしました")
             continue
     
         if question=="/history":
             chat_manager.show_last_5_messages()
             continue
     
+        if question.strip() == "/role":
+            print("available roles: ")
+            for role in ROLES.keys():
+                print(f"- {role}")
+            continue
+            
+        if question.startswith("/role "):
+            new_role = question.replace("/role ", "").strip()
+            if new_role not in ROLES:
+                print("存在しないroleです")
+                continue
+            
+            if role_key == new_role:
+                print("roleは変わりませんでした")
+                continue
+            
+            system_prompt = ROLES[new_role]
+            role_key = new_role
+            chat_manager.change_role(system_prompt)
+            print(f"roleを {new_role} に変更しました")
+            continue
+            
+        if question.startswith("/session "):
+            new_session = question.replace("/session ","").strip()
+            
+            if session == new_session:
+                print("sessionは変わりませんでした")
+                continue
+            
+            storage = ChatStorage(new_session)
+            session = new_session
+            chat_manager = ChatManager(system_prompt, storage)
+            
+            print(f"sessionを {new_session} に変更しました")
+            continue
+            
+        if question == "/help":
+            print("/session xxx    change session")
+            print("/role xxx       change role")
+            print("/role           list current roles")
+            print("/history        view history")
+            print("/reset          clear conversation")
+            print("/exit           Exit")
+            continue
+            
         chat_manager.add_user_message(question)
     
         ai_answer = ai_client.chat(messages=chat_manager.get_messages())

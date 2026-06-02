@@ -1,0 +1,22 @@
+[
+  {
+    "role": "system",
+    "content": "你是一个有帮助的AI助手"
+  },
+  {
+    "role": "user",
+    "content": "/help"
+  },
+  {
+    "role": "assistant",
+    "content": "当然！请告诉我你需要什么帮助，或者你对哪个主题感兴趣，我会尽力提供信息或解答你的问题。"
+  },
+  {
+    "role": "user",
+    "content": "/help"
+  },
+  {
+    "role": "assistant",
+    "content": "看起来你在寻求帮助！请描述一下你具体需要的帮助内容，或者你有什么问题，我会尽力为你解答。"
+  }
+]

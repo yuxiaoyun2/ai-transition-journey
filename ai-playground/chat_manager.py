@@ -25,7 +25,7 @@ class ChatManager:
             self.messages.pop(1)
         self.storage.save(self.messages)
         
-    def clear_messages(self):
+    def reset_messages(self):
         system_message = self.messages[0] if self.messages else None
         
         if system_message:
@@ -66,11 +66,19 @@ class ChatManager:
             if msg.get("role") == "system" and msg.get("content") == system_prompt:
                 return
         
-        self.messages = [
-            {
-                "role": "system",
-                "content": system_prompt
-            }
-        ]
+        self.messages =  [{"role": "system","content": system_prompt}]
+        self.storage.save(self.messages)
+        
+    def change_role(self, system_prompt: str):
+        if not self.messages:
+            self.messages = [{"role": "system","content": system_prompt}]
+        elif self.messages[0].get("role") == "system":
+            self.messages[0] =  {"role": "system","content": system_prompt}
+        else:
+            self.messages.insert(
+                0,
+                {"role": "system","content": system_prompt}
+            )
+            
         self.storage.save(self.messages)
         
