@@ -1,4 +1,5 @@
-#去重并保持顺序：
+# 去重并保持顺序：
+
 
 def unique_keyword(data: list[str]) -> list[str]:
     result = []
@@ -8,5 +9,5 @@ def unique_keyword(data: list[str]) -> list[str]:
     return result
 
 
-data = ["apple","banana","apple","APP"]
+data = ["apple", "banana", "apple", "APP"]
 print(unique_keyword(data))

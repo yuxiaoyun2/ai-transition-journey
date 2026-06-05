@@ -3,6 +3,7 @@ from todo_manager import TodoManager
 
 todo = TodoManager()
 
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python main.py [add/list/done/delete]")
@@ -20,12 +21,11 @@ def main():
     elif command == "done":
         index = int(sys.argv[2])
         task = todo.mark_done(index)
-        
+
         if task:
             print(task.display())
         else:
             print("task no exist")
-        
 
     elif command == "delete":
         index = int(sys.argv[2])
@@ -33,6 +33,7 @@ def main():
 
     else:
         print("Unknown command")
+
 
 if __name__ == "__main__":
     main()

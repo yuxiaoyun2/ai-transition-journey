@@ -7,16 +7,18 @@ def square(n):
 
 def main():
     import sys
+
     if len(sys.argv) < 2:
         print("Usage: python main.py <number>")
-        return 
-    
+        return
+
     result = square(sys.argv[1])
-    
+
     if result is None:
         print("input integer")
     else:
         print(result)
-        
+
+
 if __name__ == "__main__":
     main()
