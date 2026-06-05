@@ -17,3 +17,6 @@ ai-playground/chats/
 
 #.env
 ai-playground/.env
+
+#practice
+exercises/practice/

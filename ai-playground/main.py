@@ -12,19 +12,34 @@ def create_parser():
     parser.add_argument("--role", default="default", choices=list(ROLES.keys()))
     parser.add_argument("--session", type=str, default="default")
     parser.add_argument("--list-sessions", action="store_true")
+    
+    parser.add_argument("--model", type=str, default="gpt-4o-mini")
+    parser.add_argument("--temperature", type=float, default=0.7)
+    parser.add_argument("--max-tokens", type=int, default=500)
+    
     return parser
 
+def validate_args(args):
+    if args.temperature < 0 or args.temperature > 2:
+        raise ValueError("temperatureは0〜2で指定してください")
+    
+    if args.max_tokens <= 0:
+        raise ValueError("max_tokensは1以上にしてください")
+    
+    if not args.session.strip():
+        raise ValueError("session can't be empty (e.g. --session work)")
 
 def main():
     parser = create_parser()
     args = parser.parse_args()
-    role_key = args.role
-    session = args.session
     
-    if not session.strip():
-        print("session can't be empty (e.g. --session work)")
+    try:
+        validate_args(args)
+    except ValueError as e:
+        print(f"ERROR: {e}")
         return
     
+    session = args.session
     storage = ChatStorage(session)
     
     if args.list_sessions:
@@ -39,6 +54,7 @@ def main():
             print(f"- {s}")
         return
     
+    role_key = args.role
     system_prompt = ROLES.get(role_key, ROLES["default"])
     
     load_dotenv()
@@ -50,21 +66,25 @@ def main():
         return
     
     chat_manager = ChatManager(system_prompt, storage)
-    ai_client = AIClient(api_key)
+    ai_client = AIClient(api_key, args.model, args.temperature, args.max_tokens)
     
-    print(f"session: {session}")
-    print(f"role: {role_key}")
+    print("=== AI CLI Config ===")
+    print(f"session      {args.session}")
+    print(f"role:        {role_key}")
+    print(f"model:       {args.model}")
+    print(f"temperature: {args.temperature}")
+    print(f"max-tokens:  {args.max_tokens}")
+    print("======================")
+    
     print("AI CLIを開始します。終了するには exit と入力してください。")
     
     while True:
     
-        chat_manager.trim_messages()
-        
         question = input("you: ")
         if not question.strip():
             continue
         
-        if question=="exit":
+        if question=="/exit":
             print("保存して終了します")
             break
         
@@ -102,6 +122,10 @@ def main():
         if question.startswith("/session "):
             new_session = question.replace("/session ","").strip()
             
+            if not new_session:
+                print("session can't be empty")
+                continue
+            
             if session == new_session:
                 print("sessionは変わりませんでした")
                 continue
@@ -123,6 +147,7 @@ def main():
             continue
             
         chat_manager.add_user_message(question)
+        chat_manager.trim_messages()
     
         print("AI: ", end="", flush=True)
         reply = ai_client.stream_chat(messages=chat_manager.get_messages())
