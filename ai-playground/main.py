@@ -138,12 +138,19 @@ def main():
             continue
             
         if question == "/help":
+            print("=== Runtime Commands ===")
             print("/session xxx    change session")
             print("/role xxx       change role")
             print("/role           list current roles")
             print("/history        view history")
             print("/reset          clear conversation")
             print("/exit           Exit")
+            
+            print("\n=== Startup Options ===")
+            print("--model         set AI model")
+            print("--temperature   0~2(randomness)")
+            print("--max-tokens.   max output length")
+            
             continue
             
         chat_manager.add_user_message(question)
