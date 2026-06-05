@@ -84,7 +84,7 @@ def main():
         if not question.strip():
             continue
         
-        if question=="/exit":
+        if question in ["exit", "/exit"]:
             print("保存して終了します")
             break
         
@@ -136,21 +136,26 @@ def main():
             
             print(f"sessionを {new_session} に変更しました")
             continue
+        
+        if question == "/config":
+            print("=== AI CLI Config ===")
+            print(f"session     : {session}")
+            print(f"role        : {role_key}")
+            print(f"model       : {args.model}")
+            print(f"temperature : {args.temperature}")
+            print(f"max_tokens  : {args.max_tokens}")
+            print("======================")
+            continue
             
         if question == "/help":
             print("=== Runtime Commands ===")
+            print("/config         show current config")
             print("/session xxx    change session")
             print("/role xxx       change role")
             print("/role           list current roles")
             print("/history        view history")
             print("/reset          clear conversation")
-            print("/exit           Exit")
-            
-            print("\n=== Startup Options ===")
-            print("--model         set AI model")
-            print("--temperature   0~2(randomness)")
-            print("--max-tokens.   max output length")
-            
+            print("/exit           Exit CLI")
             continue
             
         chat_manager.add_user_message(question)
