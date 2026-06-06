@@ -10,7 +10,7 @@ __pycache__/
 
 #Data(optional)
 todo.json
-ai-playground/chats/
+ai-playground/data/
 
 #logs
 *.log

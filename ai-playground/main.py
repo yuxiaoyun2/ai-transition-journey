@@ -2,10 +2,10 @@ import os
 from dotenv import load_dotenv
 import argparse
 from config import ROLES
-from chat_manager import ChatManager
-from ai_client import AIClient
-from storage import ChatStorage
-from cli_utils import validate_args, show_config, show_help
+from core.chat_manager import ChatManager
+from core.storage import ChatStorage
+from core.ai_client import AIClient
+from cli.cli_utils import validate_args, show_config, show_help
 
 
 def create_parser():

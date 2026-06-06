@@ -1,4 +1,4 @@
-from storage import ChatStorage
+from .storage import ChatStorage
 
 
 class ChatManager:
