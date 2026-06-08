@@ -6,6 +6,7 @@ from core.chat_manager import ChatManager
 from core.storage import ChatStorage
 from core.ai_client import AIClient
 from cli.cli_utils import validate_args, show_config, show_help
+from core.exporter import ChatExporter
 
 
 def create_parser():
@@ -59,6 +60,7 @@ def main():
 
     chat_manager = ChatManager(system_prompt, storage)
     ai_client = AIClient(api_key, args.model, args.temperature, args.max_tokens)
+    exporter = ChatExporter()
 
     show_config(session, role_key, args.model, args.temperature, args.max_tokens)
 
@@ -73,6 +75,11 @@ def main():
         if question in ["exit", "/exit"]:
             print("保存して終了します")
             break
+
+        if question == "/export":
+            filepath = exporter.export_markdowm(session, chat_manager.get_messages())
+            print(f"会話履歴をエクスポートしました: {filepath}")
+            continue
 
         if question == "/reset":
             chat_manager.reset_messages()
