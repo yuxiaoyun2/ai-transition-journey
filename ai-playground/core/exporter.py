@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import json
 
 
 class ChatExporter:
@@ -24,5 +25,15 @@ class ChatExporter:
                 f.write(f"##{role}\n\n")
                 f.write(content)
                 f.write("\n\n")
+
+        return filepath
+
+    def export_json(self, session: str, messages: list) -> str:
+        now = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{session}_{now}.json"
+        filepath = os.path.join(self.export_dir, filename)
+
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(messages, f, ensure_ascii=False, indent=2)
 
         return filepath

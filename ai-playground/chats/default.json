@@ -10,5 +10,13 @@
   {
     "role": "assistant",
     "content": "Hi Yoyo! How can I assist you today?"
+  },
+  {
+    "role": "user",
+    "content": "hi"
+  },
+  {
+    "role": "assistant",
+    "content": "Hello! How are you today?"
   }
 ]

@@ -7,6 +7,7 @@ from core.storage import ChatStorage
 from core.ai_client import AIClient
 from cli.cli_utils import validate_args, show_config, show_help
 from core.exporter import ChatExporter
+from core.importer import ChatImporter
 
 
 def create_parser():
@@ -61,6 +62,7 @@ def main():
     chat_manager = ChatManager(system_prompt, storage)
     ai_client = AIClient(api_key, args.model, args.temperature, args.max_tokens)
     exporter = ChatExporter()
+    importer = ChatImporter()
 
     show_config(session, role_key, args.model, args.temperature, args.max_tokens)
 
@@ -79,6 +81,24 @@ def main():
         if question == "/export":
             filepath = exporter.export_markdowm(session, chat_manager.get_messages())
             print(f"会話履歴をエクスポートしました: {filepath}")
+            continue
+
+        if question == "/export-json":
+            filepath = exporter.export_json(session, chat_manager.get_messages())
+            print(f"会話履歴をJSONでエクスポートしました：{filepath}")
+            continue
+
+        if question.startswith("/import "):
+            filepath = question.replace("/import ", "").strip()
+
+            try:
+                messages = importer.import_json(filepath)
+                chat_manager.messages = messages
+                chat_manager.storage.save(messages)
+                print(f"会話履歴をインポートしました: {filepath}")
+            except Exception as e:
+                print(f"インポートに失敗しました： {filepath}")
+
             continue
 
         if question == "/reset":
