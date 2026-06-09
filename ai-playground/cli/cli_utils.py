@@ -30,3 +30,15 @@ def show_help():
     print("/history        view history")
     print("/reset          clear conversation")
     print("/exit           Exit CLI")
+
+
+def parse_command(text: str) -> tuple[str, list[str]]:
+    parts = text.strip().split()
+
+    if not parts:
+        return "", []
+
+    command = parts[0]
+    args = parts[1:]
+
+    return command, args

@@ -5,7 +5,7 @@ from config import ROLES
 from core.chat_manager import ChatManager
 from core.storage import ChatStorage
 from core.ai_client import AIClient
-from cli.cli_utils import validate_args, show_config, show_help
+from cli.cli_utils import validate_args, show_config, show_help, parse_command
 from core.exporter import ChatExporter
 from core.importer import ChatImporter
 
@@ -165,18 +165,13 @@ def main():
             continue
 
         if question.startswith("/rename-session "):
-            parts = question.replace("/rename-session ", "", 1).strip().split()
-            print("DEBUG raw question:", question)
-            print("DEBUG parts:", parts)
+            command, command_args = parse_command(question)
 
-            if len(parts) != 2:
+            if len(command_args) != 2:
                 print("使い方: /rename-session old_name new_name")
                 continue
 
-            old_name, new_name = parts
-
-            old_name = old_name.strip().lstrip("/")
-            new_name = new_name.strip().lstrip("/")
+            old_name, new_name = command_args
 
             if old_name == session:
                 print("現在使用中のsession名は変更できません")
