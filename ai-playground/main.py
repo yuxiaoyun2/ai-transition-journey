@@ -132,6 +132,18 @@ def main():
 
             continue
 
+        if question == "/stats":
+            stats = chat_manager.get_stats()
+
+            print("\n=== Chat Stats ===")
+            print(f"total messages: {stats['total']}")
+            print(f"system messages: {stats['system']}")
+            print(f"user messages: {stats['user']}")
+            print(f"assistant messages: {stats['assistant']}")
+            print(f"characters: {stats['characters']}")
+            print("==================\n")
+            continue
+
         if question == "/reset":
             chat_manager.reset_messages()
             print("会話履歴をリセットしました")

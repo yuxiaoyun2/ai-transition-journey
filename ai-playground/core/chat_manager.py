@@ -89,3 +89,23 @@ class ChatManager:
                 results.append(msg)
 
         return results
+
+    def get_stats(self) -> dict:
+        stats = {
+            "total": len(self.messages),
+            "system": 0,
+            "user": 0,
+            "assistant": 0,
+            "characters": 0,
+        }
+
+        for msg in self.messages:
+            role = msg.get("role", "unknown")
+            content = msg.get("content", "")
+
+            if role in stats:
+                stats[role] += 1
+
+            stats["characters"] += len(content)
+
+        return stats
