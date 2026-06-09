@@ -101,6 +101,23 @@ def main():
 
             continue
 
+        if question == "/summary":
+            summary_prompt = {
+                "role": "user",
+                "content": "これまでの会話内容を日本語で簡潔に要約してください。",
+            }
+
+            summary_messages = chat_manager.get_messages() + [summary_prompt]
+
+            try:
+                summary = ai_client.chat(summary_messages)
+                print("\n=== 会話要約 ===")
+                print(summary)
+                print("================\n")
+            except Exception as e:
+                print(f"要約に失敗しました: {e}")
+            continue
+
         if question == "/reset":
             chat_manager.reset_messages()
             print("会話履歴をリセットしました")

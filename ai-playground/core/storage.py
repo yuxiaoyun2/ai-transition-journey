@@ -3,7 +3,7 @@ import os
 
 
 class ChatStorage:
-    def __init__(self, session: str, base_dir: str = "chats"):
+    def __init__(self, session: str, base_dir: str = "data/sessions"):
         self.base_dir = base_dir
         os.makedirs(self.base_dir, exist_ok=True)
         self.file_path = os.path.join(self.base_dir, f"{session}.json")
