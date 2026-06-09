@@ -48,6 +48,44 @@ def handle_rename_session(question, session, storage):
         print(f"session名の変更に失敗しました: {e}")
 
 
+def handle_switch_session(question, session, system_prompt):
+    command, new_session = parse_command(question)
+
+    if not new_session:
+        print("session can't be empty")
+        return session, None, None
+
+    if session == new_session:
+        print("sessionは変わりませんでした")
+        return session, None, None
+
+    storage = ChatStorage(new_session)
+    chat_manager = ChatManager(system_prompt, storage)
+
+    print(f"sessionを {new_session} に変更しました")
+
+    return new_session, storage, chat_manager
+
+
+def handle_delete_session(question, session, storage):
+    command, target_session = parse_command(question)
+
+    if not target_session:
+        print("session名を入力してください")
+        return
+
+    if target_session == session:
+        print("現在使用中のsessionは削除できません")
+        return
+
+    deleted = storage.delete_session(target_session)
+
+    if deleted:
+        print(f"sessionを削除しました: {target_session}")
+    else:
+        print("指定されたsessionが見つかりませんでした")
+
+
 def main():
     parser = create_parser()
     args = parser.parse_args()
@@ -170,23 +208,7 @@ def main():
             continue
 
         if question.startswith("/delete-session "):
-            target_session = question.replace("/delete-session ", "", 1).strip()
-
-            if not target_session:
-                print("session名を入力してください")
-                continue
-
-            if target_session == session:
-                print("現在使用中のsessionは削除できません")
-                continue
-
-            deleted = storage.delete_session(target_session)
-
-            if deleted:
-                print(f"sessionを削除しました: {target_session}")
-            else:
-                print("指定されたsessionが見つかりませんでした")
-
+            handle_delete_session(question=question, session=session, storage=storage)
             continue
 
         if question.startswith("/rename-session "):
@@ -225,21 +247,15 @@ def main():
             continue
 
         if question.startswith("/session "):
-            new_session = question.replace("/session ", "").strip()
+            new_session, new_storage, new_chat_manager = handle_switch_session(
+                question, session, system_prompt
+            )
 
-            if not new_session:
-                print("session can't be empty")
-                continue
+            if new_storage and new_chat_manager:
+                session = new_session
+                storage = new_storage
+                chat_manager = new_chat_manager
 
-            if session == new_session:
-                print("sessionは変わりませんでした")
-                continue
-
-            storage = ChatStorage(new_session)
-            session = new_session
-            chat_manager = ChatManager(system_prompt, storage)
-
-            print(f"sessionを {new_session} に変更しました")
             continue
 
         if question == "/config":
