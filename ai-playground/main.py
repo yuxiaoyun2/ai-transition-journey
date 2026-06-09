@@ -23,6 +23,31 @@ def create_parser():
     return parser
 
 
+def handle_rename_session(question, session, storage):
+    command, command_args = parse_command(question)
+
+    if len(command_args) != 2:
+        print("使い方: /rename-session old_name new_name")
+        return
+
+    old_name, new_name = command_args
+
+    if old_name == session:
+        print("現在使用中のsession名は変更できません")
+        return
+
+    try:
+        renamed = storage.rename_session(old_name=old_name, new_name=new_name)
+
+        if renamed:
+            print(f"session名を変更しました: {old_name} -> {new_name}")
+        else:
+            print("変更元のsessionが見つかりませんでした")
+
+    except Exception as e:
+        print(f"session名の変更に失敗しました: {e}")
+
+
 def main():
     parser = create_parser()
     args = parser.parse_args()
@@ -165,29 +190,7 @@ def main():
             continue
 
         if question.startswith("/rename-session "):
-            command, command_args = parse_command(question)
-
-            if len(command_args) != 2:
-                print("使い方: /rename-session old_name new_name")
-                continue
-
-            old_name, new_name = command_args
-
-            if old_name == session:
-                print("現在使用中のsession名は変更できません")
-                continue
-
-            try:
-                renamed = storage.rename_session(old_name=old_name, new_name=new_name)
-
-                if renamed:
-                    print(f"session名を変更しました: {old_name} -> {new_name}")
-                else:
-                    print("変更元のsessionが見つかりませんでした")
-
-            except Exception as e:
-                print(f"session名の変更に失敗しました: {e}")
-
+            handle_rename_session(question=question, session=session, storage=storage)
             continue
 
         if question == "/reset":
