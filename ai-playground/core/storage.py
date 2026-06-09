@@ -31,3 +31,12 @@ class ChatStorage:
                 sessions.append(session_name)
 
         return sessions
+
+    def delete_session(self, session_name: str) -> bool:
+        filepath = os.path.join(self.base_dir, f"{session_name}.json")
+
+        if not os.path.exists(filepath):
+            return False
+
+        os.remove(filepath)
+        return True

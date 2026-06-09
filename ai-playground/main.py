@@ -144,6 +144,26 @@ def main():
             print("==================\n")
             continue
 
+        if question.startswith("/delete-session "):
+            target_session = question.replace("/delete-session ", "", 1).strip()
+
+            if not target_session:
+                print("session名を入力してください")
+                continue
+
+            if target_session == session:
+                print("現在使用中のsessionは削除できません")
+                continue
+
+            deleted = storage.delete_session(target_session)
+
+            if deleted:
+                print(f"sessionを削除しました: {target_session}")
+            else:
+                print("指定されたsessionが見つかりませんでした")
+
+            continue
+
         if question == "/reset":
             chat_manager.reset_messages()
             print("会話履歴をリセットしました")
