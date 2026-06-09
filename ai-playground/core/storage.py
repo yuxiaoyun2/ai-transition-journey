@@ -40,3 +40,16 @@ class ChatStorage:
 
         os.remove(filepath)
         return True
+
+    def rename_session(self, old_name: str, new_name: str) -> bool:
+        old_path = os.path.join(self.base_dir, f"{old_name}.json")
+        new_path = os.path.join(self.base_dir, f"{new_name}.json")
+
+        if os.path.exists(new_path):
+            raise FileExistsError("変更先のsessionはすでに存在します")
+
+        if not os.path.exists(old_path):
+            raise FileNotFoundError((f"session not found: {old_name}"))
+
+        os.rename(old_path, new_path)
+        return True

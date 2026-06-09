@@ -164,6 +164,37 @@ def main():
 
             continue
 
+        if question.startswith("/rename-session "):
+            parts = question.replace("/rename-session ", "", 1).strip().split()
+            print("DEBUG raw question:", question)
+            print("DEBUG parts:", parts)
+
+            if len(parts) != 2:
+                print("使い方: /rename-session old_name new_name")
+                continue
+
+            old_name, new_name = parts
+
+            old_name = old_name.strip().lstrip("/")
+            new_name = new_name.strip().lstrip("/")
+
+            if old_name == session:
+                print("現在使用中のsession名は変更できません")
+                continue
+
+            try:
+                renamed = storage.rename_session(old_name=old_name, new_name=new_name)
+
+                if renamed:
+                    print(f"session名を変更しました: {old_name} -> {new_name}")
+                else:
+                    print("変更元のsessionが見つかりませんでした")
+
+            except Exception as e:
+                print(f"session名の変更に失敗しました: {e}")
+
+            continue
+
         if question == "/reset":
             chat_manager.reset_messages()
             print("会話履歴をリセットしました")
