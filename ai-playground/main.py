@@ -79,7 +79,7 @@ def main():
             break
 
         if question == "/export":
-            filepath = exporter.export_markdowm(session, chat_manager.get_messages())
+            filepath = exporter.export_markdown(session, chat_manager.get_messages())
             print(f"会話履歴をエクスポートしました: {filepath}")
             continue
 
@@ -97,7 +97,7 @@ def main():
                 chat_manager.storage.save(messages)
                 print(f"会話履歴をインポートしました: {filepath}")
             except Exception as e:
-                print(f"インポートに失敗しました： {filepath}")
+                print(f"インポートに失敗しました： {e}")
 
             continue
 
@@ -116,6 +116,20 @@ def main():
                 print("================\n")
             except Exception as e:
                 print(f"要約に失敗しました: {e}")
+            continue
+
+        if question.startswith("/search "):
+            keyword = question.replace("/search ", "", 1).strip()
+            results = chat_manager.search_messages(keyword=keyword)
+            if not results:
+                print("該当するメッセージが見つかりませんでした")
+            else:
+                print(f"\n=== 検索結果 （{len(results)}件）===")
+                for i, msg in enumerate(results, 1):
+                    print(f"{i}. [{msg['role']}]")
+                    print(msg["content"])
+                    print("-" * 20)
+
             continue
 
         if question == "/reset":

@@ -9,7 +9,7 @@ class ChatExporter:
         self.export_dir = export_dir
         os.makedirs(self.export_dir, exist_ok=True)
 
-    def export_markdowm(self, session: str, messages: list) -> str:
+    def export_markdown(self, session: str, messages: list) -> str:
         now = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{session}_{now}.md"
         filepath = os.path.join(self.export_dir, filename)

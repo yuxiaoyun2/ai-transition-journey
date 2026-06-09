@@ -79,3 +79,13 @@ class ChatManager:
             self.messages.insert(0, {"role": "system", "content": system_prompt})
 
         self.storage.save(self.messages)
+
+    def search_messages(self, keyword: str) -> list:
+        results = []
+
+        for msg in self.messages:
+            content = msg.get("content", "")
+            if keyword.lower() in content.lower():
+                results.append(msg)
+
+        return results
