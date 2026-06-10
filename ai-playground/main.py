@@ -23,9 +23,7 @@ def create_parser():
     return parser
 
 
-def handle_rename_session(question, session, storage):
-    command, command_args = parse_command(question)
-
+def handle_rename_session(command_args, session, storage):
     if len(command_args) != 2:
         print("使い方: /rename-session old_name new_name")
         return
@@ -48,8 +46,12 @@ def handle_rename_session(question, session, storage):
         print(f"session名の変更に失敗しました: {e}")
 
 
-def handle_switch_session(question, session, system_prompt):
-    command, new_session = parse_command(question)
+def handle_switch_session(command_args, session, system_prompt):
+    if len(command_args) != 1:
+        print("使い方: /session session_name")
+        return session, None, None
+
+    new_session = command_args[0]
 
     if not new_session:
         print("session can't be empty")
@@ -67,8 +69,12 @@ def handle_switch_session(question, session, system_prompt):
     return new_session, storage, chat_manager
 
 
-def handle_delete_session(question, session, storage):
-    command, target_session = parse_command(question)
+def handle_delete_session(command_args, session, storage):
+    if len(command_args) != 1:
+        print("使い方: /delete-session session_name")
+        return
+
+    target_session = command_args[0]
 
     if not target_session:
         print("session名を入力してください")
@@ -84,6 +90,56 @@ def handle_delete_session(question, session, storage):
         print(f"sessionを削除しました: {target_session}")
     else:
         print("指定されたsessionが見つかりませんでした")
+
+
+def handle_import_file(command_args, importer, chat_manager):
+    if len(command_args) != 1:
+        print("使い方： /import filepath")
+        return
+
+    filepath = command_args[0]
+
+    try:
+        messages = importer.import_json(filepath)
+        chat_manager.messages = messages
+        chat_manager.storage.save(messages)
+        print(f"会話履歴をインポートしました: {filepath}")
+    except Exception as e:
+        print(f"インポートに失敗しました： {e}")
+
+
+def handle_summary(chat_manager, ai_client):
+    summary_prompt = {
+        "role": "user",
+        "content": "これまでの会話内容を日本語で簡潔に要約してください。",
+    }
+
+    summary_messages = chat_manager.get_messages() + [summary_prompt]
+
+    try:
+        summary = ai_client.chat(summary_messages)
+        print("\n=== 会話要約 ===")
+        print(summary)
+        print("================\n")
+    except Exception as e:
+        print(f"要約に失敗しました: {e}")
+
+
+def handle_search(command_args, chat_manager):
+    if len(command_args) != 1:
+        print("使い方： /search keyword")
+        return
+
+    keyword = command_args[0]
+    results = chat_manager.search_messages(keyword=keyword)
+    if not results:
+        print("該当するメッセージが見つかりませんでした")
+    else:
+        print(f"\n=== 検索結果 （{len(results)}件）===")
+        for i, msg in enumerate(results, 1):
+            print(f"{i}. [{msg['role']}]")
+            print(msg["content"])
+            print("-" * 20)
 
 
 def main():
@@ -137,65 +193,37 @@ def main():
         if not question.strip():
             continue
 
-        if question in ["exit", "/exit"]:
+        command, command_args = parse_command(question)
+
+        if command in ["exit", "/exit"]:
             print("保存して終了します")
             break
 
-        if question == "/export":
+        if command == "/export":
             filepath = exporter.export_markdown(session, chat_manager.get_messages())
             print(f"会話履歴をエクスポートしました: {filepath}")
             continue
 
-        if question == "/export-json":
+        if command == "/export-json":
             filepath = exporter.export_json(session, chat_manager.get_messages())
             print(f"会話履歴をJSONでエクスポートしました：{filepath}")
             continue
 
-        if question.startswith("/import "):
-            filepath = question.replace("/import ", "").strip()
-
-            try:
-                messages = importer.import_json(filepath)
-                chat_manager.messages = messages
-                chat_manager.storage.save(messages)
-                print(f"会話履歴をインポートしました: {filepath}")
-            except Exception as e:
-                print(f"インポートに失敗しました： {e}")
-
+        if command == "/import":
+            handle_import_file(
+                command_args=command_args, importer=importer, chat_manager=chat_manager
+            )
             continue
 
-        if question == "/summary":
-            summary_prompt = {
-                "role": "user",
-                "content": "これまでの会話内容を日本語で簡潔に要約してください。",
-            }
-
-            summary_messages = chat_manager.get_messages() + [summary_prompt]
-
-            try:
-                summary = ai_client.chat(summary_messages)
-                print("\n=== 会話要約 ===")
-                print(summary)
-                print("================\n")
-            except Exception as e:
-                print(f"要約に失敗しました: {e}")
+        if command == "/summary":
+            handle_summary(chat_manager=chat_manager, ai_client=ai_client)
             continue
 
-        if question.startswith("/search "):
-            keyword = question.replace("/search ", "", 1).strip()
-            results = chat_manager.search_messages(keyword=keyword)
-            if not results:
-                print("該当するメッセージが見つかりませんでした")
-            else:
-                print(f"\n=== 検索結果 （{len(results)}件）===")
-                for i, msg in enumerate(results, 1):
-                    print(f"{i}. [{msg['role']}]")
-                    print(msg["content"])
-                    print("-" * 20)
-
+        if command == "/search":
+            handle_search(command_args=command_args, chat_manager=chat_manager)
             continue
 
-        if question == "/stats":
+        if command == "/stats":
             stats = chat_manager.get_stats()
 
             print("\n=== Chat Stats ===")
@@ -207,31 +235,39 @@ def main():
             print("==================\n")
             continue
 
-        if question.startswith("/delete-session "):
-            handle_delete_session(question=question, session=session, storage=storage)
+        if command == "/delete-session":
+            handle_delete_session(
+                command_args=command_args, session=session, storage=storage
+            )
             continue
 
-        if question.startswith("/rename-session "):
-            handle_rename_session(question=question, session=session, storage=storage)
+        if command == "/rename-session":
+            handle_rename_session(
+                command_args=command_args, session=session, storage=storage
+            )
             continue
 
-        if question == "/reset":
+        if command == "/reset":
             chat_manager.reset_messages()
             print("会話履歴をリセットしました")
             continue
 
-        if question == "/history":
+        if command == "/history":
             chat_manager.show_last_5_messages()
             continue
 
-        if question.strip() == "/role":
+        if command == "/role":
             print("available roles: ")
             for role in ROLES.keys():
                 print(f"- {role}")
             continue
 
-        if question.startswith("/role "):
-            new_role = question.replace("/role ", "").strip()
+        if command == "/set-role":
+            if len(command_args) != 1:
+                print("使い方: /set-role role_name")
+                continue
+
+            new_role = command_args[0]
             if new_role not in ROLES:
                 print("存在しないroleです")
                 continue
@@ -246,9 +282,9 @@ def main():
             print(f"roleを {new_role} に変更しました")
             continue
 
-        if question.startswith("/session "):
+        if command == "/session":
             new_session, new_storage, new_chat_manager = handle_switch_session(
-                question, session, system_prompt
+                command_args, session, system_prompt
             )
 
             if new_storage and new_chat_manager:
@@ -258,13 +294,13 @@ def main():
 
             continue
 
-        if question == "/config":
+        if command == "/config":
             show_config(
                 session, role_key, args.model, args.temperature, args.max_tokens
             )
             continue
 
-        if question == "/help":
+        if command == "/help":
             show_help()
             continue
 
