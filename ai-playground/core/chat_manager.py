@@ -55,11 +55,9 @@ class ChatManager:
 
         return recent
 
-    def show_last_5_messages(self):
-        msgs = self.messages[1:][-5:]
-        for msg in msgs:
-            role = "you: " if msg["role"] == "user" else "AI: "
-            print(f"{role} {msg['content']}")
+    def show_last_messages(self, limit: int = 5):
+        for msg in self.messages[1:][-limit:]:
+            print(f"[{msg['role']}] {msg['content']}")
 
     def _ensure_single_system_message(self, system_prompt):
         if self.messages:

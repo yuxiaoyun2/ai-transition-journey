@@ -253,7 +253,16 @@ def main():
             continue
 
         if command == "/history":
-            chat_manager.show_last_5_messages()
+            limit = 5
+
+            if command_args:
+                try:
+                    limit = int(command_args[0])
+                except ValueError:
+                    print("数字を入力してください")
+                    continue
+
+            chat_manager.show_last_messages(limit)
             continue
 
         if command == "/role":
