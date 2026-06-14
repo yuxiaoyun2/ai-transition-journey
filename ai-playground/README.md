@@ -1,40 +1,66 @@
 # AI CLI Chat Tool
 
-Pythonで作成したCLIベースのAIチャットツールです。
+## Overview
+
+This project is a CLI-based AI chat tool built with Python and OpenAI API.
+
+The project focuses on:
+
+- session management
+- role switching
+- command-driven interaction
+- maintainable architecture
+- extensibility
 
 ---
 
 ## Features
 
-- AIとの対話
-- role切り替え
-- session管理
-- JSONによる会話履歴の保存
-- streaming出力
-- token制限
-- model / temperature / max_tokens の指定
-- runtime command対応
-- pre-commit + Black による自動フォーマット
+- AI chat interaction
+- Role switching
+- Session management
+- Chat history persistence
+- Search
+- Summary
+- Import / Export
+- Streaming output
+- Token limit management
+- Configurable model / temperature / max_tokens
+- Runtime command
+- pre-commit + Black
 
 ---
 
 ## Project Structure
 
 ```plaintext
-ai-playground/
-├── main.py
-├── config.py
-├── core/
-│   ├── ai_client.py
-│   ├── chat_manager.py
-│   └── storage.py
-├── cli/
-│   └── cli_utils.py
-├── data/
-│   └── sessions/
-├── requirements.txt
-└── .pre-commit-config.yaml
+├── ai-playground
+│   ├── cli
+│   │   └── cli_utils.py
+│   ├── config.py
+│   ├── core
+│   │   ├── ai_client.py
+│   │   ├── chat_manager.py
+│   │   ├── exporter.py
+│   │   ├── importer.py
+│   │   └── storage.py
+│   ├── data
+│   │   └── sessions
+│   ├── exports
+│   ├── main.py
+│   ├── README.md
+│   └── requirements.txt
 ```
+
+## Tech Stack
+
+- Python
+- OpenAI API
+- argparse
+- python-dotenv
+- JSON
+- Black
+- pre-commit
 
 ## Setup
 
@@ -62,7 +88,7 @@ python3 main.py --session demo
 python3 main.py --session default
 ```
 
-パラメータ指定：
+Example with parameters：
 ```bash
 python3 main.py \
   --session study \
@@ -75,24 +101,50 @@ python3 main.py \
 ## Runtime Commands
 
 ```text
-/help          show commands
-/config        show current config
-/role          list roles
-/role xxx      change role
-/session xxx   change session
-/history       show recent history
-/reset         reset conversation
-/exit          exit CLI
+/help
+/config
+
+/role
+/set-role xxx
+
+/session xxx
+/rename-session old new
+/delete-session xxx
+
+/history
+/search keyword 
+/summary
+/stats
+
+/export
+/import filepath
+
+/reset 
+/exit 
+```
+
+## Examples
+
+```bash
+/session work
+
+/search OpenAI
+
+/import backup.json
+
+//rename-session work project
+
+/delete-session old_session
 ```
 
 ## Development
 
-コード整形：
+Code formatting：                                                            
 ```bash
 python3 -m black .
 ```
 
-pre-commit設定：
+pre-commit setup：
 ```bash
 python3 -m pre_commit install
 python3 -m pre_commit run --all-files
@@ -100,20 +152,46 @@ python3 -m pre_commit run --all-files
 
 ## Design
 
-このプロジェクトでは、責務分離を意識しています。
+The project separates responsibilities into:
 
-- main.py: アプリケーションの入口
-- core/: AI通信、会話管理、保存処理
-- cli/: CLI表示、入力チェック、help表示
-- data/: sessionデータ保存 
+- CLI Layer
+- Business Logic Layer
+- Data Persistence Layer
+
+This design improves maintainability, readability, and extensibility.
+
+## Architecture
+
+```text
+User Input
+    ↓
+CLI Layer
+    ↓
+Command Parser
+    ↓
+Chat Manager
+    ↓
+Storage / AI Client
+    ↓
+JSON Files / OpenAI API
+```
 
 ## What I Learned
 
-- OpenAI APIの利用
-- streaming responseの実装
-- CLI引数設計
-- JSON永続化
-- token制限
-- role/session設計
-- Python package構造
-- pre-commitによる開発フロー改善
+- OpenAI API integration
+- Streaming response implementation
+- Session management design
+- Command parsing and handler pattern
+- JSON persistence
+- Token limit management
+- CLI architecture design
+- Separation of Concerns
+- Development workflow using pre-commit and Black
+
+
+## Future Improvements
+
+- Command dispatch table
+- SQLite persistence
+- Better search capabilities
+- Configuration management
