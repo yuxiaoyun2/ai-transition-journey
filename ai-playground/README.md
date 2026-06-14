@@ -19,14 +19,14 @@ The project focuses on:
 - AI chat interaction
 - Role switching
 - Session management
-- Chat history persistence
+- JSON-based Chat History Persistence
 - Search
 - Summary
 - Import / Export
 - Streaming output
-- Token limit management
-- Configurable model / temperature / max_tokens
-- Runtime command
+- Message history trimming
+- Configurable model / temperature / Max Tokens
+- Runtime Command
 - pre-commit + Black
 
 ---
@@ -73,6 +73,12 @@ Create a `.env` file:
 OPENAI_API_KEY=your_api_key_here
 ```
 
+## Requirements
+
+- Python 3.10+
+- OpenAI API Key
+
+
 ## Quick Start
 
 ```bash
@@ -88,7 +94,7 @@ python3 main.py --session demo
 python3 main.py --session default
 ```
 
-Example with parameters：
+Example with parameters:
 ```bash
 python3 main.py \
   --session study \
@@ -132,19 +138,19 @@ python3 main.py \
 
 /import backup.json
 
-//rename-session work project
+/rename-session work project
 
 /delete-session old_session
 ```
 
 ## Development
 
-Code formatting：                                                            
+Code formatting:                                                        
 ```bash
 python3 -m black .
 ```
 
-pre-commit setup：
+pre-commit setup:
 ```bash
 python3 -m pre_commit install
 python3 -m pre_commit run --all-files
@@ -191,7 +197,6 @@ JSON Files / OpenAI API
 
 ## Future Improvements
 
-- Command dispatch table
 - SQLite persistence
 - Better search capabilities
 - Configuration management
