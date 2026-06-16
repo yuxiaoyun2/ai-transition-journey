@@ -17,7 +17,8 @@ ai-playground/exports/
 *.log
 
 #.env
-ai-playground/.env
+.venv/  
+.env
 
 #practice
 exercises/practice/
