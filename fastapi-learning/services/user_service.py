@@ -1,20 +1,65 @@
-users = [{"id": 1, "name": "Tom"}, {"id": 2, "name": "Alice"}]
+from database import get_connection
 
 
 def get_all_users():
-    return users
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+    SELECT id, name 
+    FROM users
+    """
+    )
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return [{"id": row[0], "name": row[1]} for row in rows]
 
 
 def get_user_by_id(user_id: int):
-    for user in users:
-        if user["id"] == user_id:
-            return user
-    return None
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT id, name
+        FROM users
+        WHERE id = ?
+        """,
+        (user_id,),
+    )
+
+    row = cursor.fetchone()
+
+    conn.close()
+
+    if not row:
+        return None
+    return {
+        "id": row[0],
+        "name": row[1],
+    }
 
 
 def create_user(name: str):
-    new_user = {"id": len(users) + 1, "name": name}
+    conn = get_connection()
+    cursor = conn.cursor()
 
-    users.append(new_user)
+    cursor.execute(
+        """
+    INSERT INTO users(name)
+    VALUES(?)
+    """,
+        (name,),
+    )
 
-    return new_user
+    conn.commit()
+
+    user_id = cursor.lastrowid
+
+    conn.close()
+
+    return {"id": user_id, "name": name}
