@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from models.user import UserCreate, UserUpdate
 from services.user_service import (
@@ -21,12 +21,16 @@ def get_users():
 def get_user(user_id: int):
     user = get_user_by_id(user_id)
 
-    if user:
-        return user
-    return {"error": "user not found"}
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="user not found",
+        )
+
+    return user
 
 
-@router.post("/users")
+@router.post("/users", status_code=201)
 def create_new_user(user: UserCreate):
     return create_user(user.name)
 
@@ -39,7 +43,10 @@ def update_existing_user(
     success = update_user(user_id, user.name)
 
     if not success:
-        return {"error": "user not found"}
+        raise HTTPException(
+            status_code=404,
+            detail="User not found",
+        )
 
     return {"id": user_id, "name": user.name}
 
@@ -50,6 +57,6 @@ def delete_exixting_user(user_id: int):
     success = delete_user(user_id)
 
     if not success:
-        return {"error": "user not found"}
+        raise HTTPException(status_code=404, detail="User not found")
 
     return {"message": "user deleted"}
