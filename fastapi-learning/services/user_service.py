@@ -50,9 +50,9 @@ def create_user(name: str):
 
     cursor.execute(
         """
-    INSERT INTO users(name)
-    VALUES(?)
-    """,
+        INSERT INTO users(name)
+        VALUES(?)
+        """,
         (name,),
     )
 
@@ -63,3 +63,43 @@ def create_user(name: str):
     conn.close()
 
     return {"id": user_id, "name": name}
+
+
+def update_user(user_id: int, name: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE users
+        SET name = ?
+        WHERE id = ?
+        """,
+        (name, user_id),
+    )
+
+    conn.commit()
+    updated = cursor.rowcount
+
+    conn.close()
+
+    return updated > 0
+
+
+def delete_user(user_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        DELETE FROM users
+        WHERE id = ?
+        """,
+        (user_id,),
+    )
+
+    conn.commit()
+    deleted = cursor.rowcount
+    conn.close()
+
+    return deleted > 0
