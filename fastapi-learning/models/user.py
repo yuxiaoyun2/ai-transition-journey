@@ -7,3 +7,12 @@ class UserCreate(BaseModel):
 
 class UserUpdate(BaseModel):
     name: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+
+
+class MessageResponse(BaseModel):
+    message: str
