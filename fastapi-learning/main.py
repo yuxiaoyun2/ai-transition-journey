@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-
+from config import APP_NAME
 from database import init_db
 from routers.user_router import router
 
-app = FastAPI()
+app = FastAPI(title=APP_NAME)
 
 init_db()
 
