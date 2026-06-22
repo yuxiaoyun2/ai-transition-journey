@@ -7,9 +7,9 @@ def find_all():
 
     cursor.execute(
         """
-    SELECT id, name
-    FROM users
-    """
+        SELECT id, name
+        FROM users
+        """
     )
 
     rows = cursor.fetchall()
@@ -25,10 +25,10 @@ def find_by_id(user_id: int):
 
     cursor.execute(
         """
-    SELECT id , name
-    FROM users
-    WHERE id = ?
-    """,
+        SELECT id , name
+        FROM users
+        WHERE id = ?
+        """,
         (user_id,),
     )
 
@@ -45,9 +45,9 @@ def save(name: str):
 
     cursor.execute(
         """
-    INSERT INTO users(name)
-    VALUES(?)
-    """,
+        INSERT INTO users(name)
+        VALUES(?)
+        """,
         (name,),
     )
 
@@ -66,10 +66,10 @@ def update(user_id, name: str):
 
     cursor.execute(
         """
-    UPDATE users
-    SET name = ?
-    WHERE id = ?
-    """,
+        UPDATE users
+        SET name = ?
+        WHERE id = ?
+        """,
         (name, user_id),
     )
 
@@ -89,9 +89,9 @@ def delete(user_id: int):
 
     cursor.execute(
         """
-    DELETE FROM users
-    WHERE id = ?
-    """,
+        DELETE FROM users
+        WHERE id = ?
+        """,
         (user_id,),
     )
 

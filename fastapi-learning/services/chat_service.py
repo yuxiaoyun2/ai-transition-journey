@@ -2,6 +2,8 @@ from openai import OpenAI
 
 from config import OPENAI_API_KEY, OPENAI_MODEL
 
+from repositories.chat_repository import save_chat_message
+
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY is not set")
 
@@ -23,4 +25,11 @@ def generate_answer(message: str) -> str:
         ],
     )
 
-    return response.choices[0].message.content
+    answer = response.choices[0].message.content
+
+    save_chat_message(
+        user_message=message,
+        ai_answer=answer,
+    )
+
+    return answer
