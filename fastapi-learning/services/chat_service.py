@@ -2,7 +2,11 @@ from openai import OpenAI
 
 from config import OPENAI_API_KEY, OPENAI_MODEL
 
-from repositories.chat_repository import save_chat_message, find_all_chat_messages
+from repositories.chat_repository import (
+    save_chat_message,
+    find_all_chat_messages,
+    delete_all_chat_history,
+)
 
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY is not set")
@@ -47,3 +51,7 @@ def get_chat_history():
         }
         for row in rows
     ]
+
+
+def delete_chat_history():
+    return delete_all_chat_history()

@@ -14,3 +14,7 @@ class ChatHistoryResponse(BaseModel):
     user_message: str
     ai_answer: str
     created_at: str
+
+
+class ChatMessageResponse(BaseModel):
+    message: str

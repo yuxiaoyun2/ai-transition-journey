@@ -1,7 +1,12 @@
 from fastapi import APIRouter, HTTPException
 
-from models.chat import ChatRequest, ChatResponse, ChatHistoryResponse
-from services.chat_service import generate_answer, get_chat_history
+from models.chat import (
+    ChatRequest,
+    ChatResponse,
+    ChatHistoryResponse,
+    ChatMessageResponse,
+)
+from services.chat_service import generate_answer, get_chat_history, delete_chat_history
 
 router = APIRouter()
 
@@ -22,6 +27,18 @@ def chat(request: ChatRequest):
         )
 
 
-@router.get("/chat/history", response_model=list[ChatHistoryResponse])
+@router.get(
+    "/chat/history",
+    response_model=list[ChatHistoryResponse],
+)
 def chat_history():
     return get_chat_history()
+
+
+@router.delete(
+    "/chat/history",
+    response_model=ChatMessageResponse,
+)
+def delete_chat_history_api():
+    delete_chat_history()
+    return {"message": "all chat deleted"}

@@ -39,3 +39,22 @@ def find_all_chat_messages():
     conn.close()
 
     return rows
+
+
+def delete_all_chat_history():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+    DELETE FROM chat_messages
+    """
+    )
+
+    conn.commit()
+
+    deleted = cursor.rowcount
+
+    conn.close()
+
+    return deleted
