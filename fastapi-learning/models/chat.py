@@ -7,3 +7,10 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     answer: str
+
+
+class ChatHistoryResponse(BaseModel):
+    id: int
+    user_message: str
+    ai_answer: str
+    created_at: str

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
-from models.chat import ChatRequest, ChatResponse
-from services.chat_service import generate_answer
+from models.chat import ChatRequest, ChatResponse, ChatHistoryResponse
+from services.chat_service import generate_answer, get_chat_history
 
 router = APIRouter()
 
@@ -20,3 +20,8 @@ def chat(request: ChatRequest):
             status_code=500,
             detail="Failed to generate AI response",
         )
+
+
+@router.get("/chat/history", response_model=list[ChatHistoryResponse])
+def chat_history():
+    return get_chat_history()

@@ -20,3 +20,22 @@ def save_chat_message(user_message: str, ai_answer: str):
     conn.close()
 
     return chat_id
+
+
+def find_all_chat_messages():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+    SELECT id, user_message, ai_answer, created_at
+    FROM chat_messages
+    ORDER BY id DESC
+    """
+    )
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return rows

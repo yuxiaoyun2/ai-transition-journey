@@ -2,7 +2,7 @@ from openai import OpenAI
 
 from config import OPENAI_API_KEY, OPENAI_MODEL
 
-from repositories.chat_repository import save_chat_message
+from repositories.chat_repository import save_chat_message, find_all_chat_messages
 
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY is not set")
@@ -33,3 +33,17 @@ def generate_answer(message: str) -> str:
     )
 
     return answer
+
+
+def get_chat_history():
+    rows = find_all_chat_messages()
+
+    return [
+        {
+            "id": row[0],
+            "user_message": row[1],
+            "ai_answer": row[2],
+            "created_at": row[3],
+        }
+        for row in rows
+    ]
