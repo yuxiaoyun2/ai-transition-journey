@@ -6,7 +6,12 @@ from models.chat import (
     ChatHistoryResponse,
     ChatMessageResponse,
 )
-from services.chat_service import generate_answer, get_chat_history, delete_chat_history
+from services.chat_service import (
+    generate_answer,
+    get_chat_history,
+    delete_chat_history,
+    get_recent_chat_history,
+)
 
 router = APIRouter()
 

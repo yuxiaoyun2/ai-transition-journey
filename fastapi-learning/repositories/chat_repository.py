@@ -41,6 +41,27 @@ def find_all_chat_messages():
     return rows
 
 
+def find_recent_chat_messages(limit: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+    SELECT id, user_message, ai_answer, created_at
+    FROM chat_messages
+    ORDER BY id DESC
+    LIMIT ?
+    """,
+        (limit,),
+    )
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return rows
+
+
 def delete_all_chat_history():
     conn = get_connection()
     cursor = conn.cursor()
