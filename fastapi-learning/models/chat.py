@@ -18,3 +18,7 @@ class ChatHistoryResponse(BaseModel):
 
 class ChatMessageResponse(BaseModel):
     message: str
+
+
+class ChatSummaryResponse(BaseModel):
+    summary: str

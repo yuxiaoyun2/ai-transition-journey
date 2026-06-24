@@ -79,3 +79,44 @@ def delete_all_chat_history():
     conn.close()
 
     return deleted
+
+
+def save_chat_summary(summary: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+    INSERT INTO chat_summaries(summary)
+    VALUES(?)
+    """,
+        (summary,),
+    )
+
+    conn.commit()
+
+    summary_id = cursor.lastrowid
+
+    conn.close()
+
+    return summary_id
+
+
+def find_latest_chat_summary():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+    SELECT id, summary, create_at
+    FROM chat_summaries
+    ORDER BY id DESC
+    LIMIT 1
+    """,
+    )
+
+    row = cursor.fetchone()
+
+    conn.close()
+
+    return row

@@ -31,5 +31,15 @@ def init_db():
         """
     )
 
+    cursor.execute(
+        """
+    CREATE TABLE IF NOT EXISTS chat_summaries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    summary TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """
+    )
+
     conn.commit()
     conn.close()
