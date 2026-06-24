@@ -1,6 +1,6 @@
 from openai import OpenAI
 
-from config import OPENAI_API_KEY, OPENAI_MODEL
+from config import OPENAI_API_KEY, OPENAI_MODEL, CHAT_HISTORY_LIMIT, SYSTEM_PROMPT
 
 from repositories.chat_repository import (
     save_chat_message,
@@ -47,7 +47,7 @@ def get_chat_history():
     ]
 
 
-def get_recent_chat_history(limit: int):
+def get_recent_chat_rows(limit: int):
     return find_recent_chat_messages(limit)
 
 
@@ -56,12 +56,12 @@ def delete_chat_history():
 
 
 def build_openai_messages(message: str):
-    recent_rows = reversed(get_recent_chat_history(5))
+    recent_rows = reversed(get_recent_chat_rows(CHAT_HISTORY_LIMIT))
 
     messages = [
         {
             "role": "system",
-            "content": "You are a helpful assistant",
+            "content": SYSTEM_PROMPT,
         }
     ]
 
