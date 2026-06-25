@@ -120,3 +120,57 @@ def find_latest_chat_summary():
     conn.close()
 
     return row
+
+
+def total_messages():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+    SELECT COUNT(*)
+    FROM chat_messages
+    """
+    )
+
+    count = cursor.fetchone()[0]
+
+    conn.close()
+
+    return count
+
+
+def total_summaries():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+    SELECT COUNT(*)
+    FROM chat_summaries
+    """
+    )
+
+    count = cursor.fetchone()[0]
+
+    conn.close()
+
+    return count
+
+
+def latest_chat_time():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+    SELECT Max(created_at)
+    FROM chat_messages
+    """
+    )
+
+    max = cursor.fetchone()[0]
+
+    conn.close()
+
+    return max

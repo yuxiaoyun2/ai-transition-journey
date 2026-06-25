@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class ChatRequest(BaseModel):
@@ -22,3 +23,9 @@ class ChatMessageResponse(BaseModel):
 
 class ChatSummaryResponse(BaseModel):
     summary: str
+
+
+class ChatStatsResponse(BaseModel):
+    total_messages: int
+    total_summaries: int
+    latest_chat_time: Optional[str] = None

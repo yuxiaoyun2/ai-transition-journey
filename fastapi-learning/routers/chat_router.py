@@ -6,12 +6,14 @@ from models.chat import (
     ChatHistoryResponse,
     ChatMessageResponse,
     ChatSummaryResponse,
+    ChatStatsResponse,
 )
 from services.chat_service import (
     generate_answer,
     get_chat_history,
     delete_chat_history,
     generate_summary,
+    get_chat_stats,
 )
 
 router = APIRouter()
@@ -56,3 +58,11 @@ def delete_chat_history_api():
 )
 def chat_summary():
     return generate_summary()
+
+
+@router.get(
+    "/chat/stats",
+    response_model=ChatStatsResponse,
+)
+def chat_stats():
+    return get_chat_stats()
