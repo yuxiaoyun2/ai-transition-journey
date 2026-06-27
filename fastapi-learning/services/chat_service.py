@@ -27,7 +27,11 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 def generate_answer(message: str) -> str:
-    messages = build_openai_messages(message)
+    rows = get_recent_chat_rows(CHAT_HISTORY_LIMIT)
+
+    messages = build_messages(SYSTEM_PROMPT, rows)
+
+    messages.append({"role": "user", "content": message})
 
     response = client.chat.completions.create(
         model=OPENAI_MODEL,
@@ -66,32 +70,28 @@ def delete_chat_history():
     return delete_all_chat_history()
 
 
-def build_openai_messages(message: str):
-    recent_rows = reversed(get_recent_chat_rows(CHAT_HISTORY_LIMIT))
-
+def build_messages(system_prompt: str, rows):
     messages = [
         {
             "role": "system",
-            "content": SYSTEM_PROMPT,
+            "content": system_prompt,
         }
     ]
 
-    for row in recent_rows:
+    for row in reversed(rows):
         messages.append({"role": "user", "content": row[1]})
         messages.append({"role": "assistant", "content": row[2]})
-
-    messages.append({"role": "user", "content": message})
 
     return messages
 
 
 def generate_summary():
-    recent_rows = get_recent_chat_rows(CHAT_HISTORY_LIMIT)
+    rows = get_recent_chat_rows(CHAT_HISTORY_LIMIT)
 
-    if not recent_rows:
-        return {"summary": "No chat history to summary"}
+    if not rows:
+        return {"summary": "No chat history to summarize"}
 
-    messages = build_summary_context(recent_rows)
+    messages = build_messages(CHAT_SUMMARY_PROMPT, rows)
 
     response = client.chat.completions.create(
         model=OPENAI_MODEL,
@@ -103,21 +103,6 @@ def generate_summary():
     save_chat_summary(summary)
 
     return {"summary": summary}
-
-
-def build_summary_context(rows):
-    messages = [
-        {
-            "role": "system",
-            "content": CHAT_SUMMARY_PROMPT,
-        }
-    ]
-
-    for row in reversed(rows):
-        messages.append({"role": "user", "content": row[1]})
-        messages.append({"role": "assistant", "content": row[2]})
-
-    return messages
 
 
 def get_chat_summary_service():
