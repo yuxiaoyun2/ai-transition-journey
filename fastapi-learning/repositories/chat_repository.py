@@ -2,175 +2,164 @@ from database import get_connection
 
 
 def save_chat_message(user_message: str, ai_answer: str):
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_connection() as conn:
+        cursor = conn.cursor()
 
-    cursor.execute(
-        """
-    INSERT INTO chat_messages(user_message,ai_answer)
-    VALUES(?, ?)
-    """,
-        (user_message, ai_answer),
-    )
+        cursor.execute(
+            """
+            INSERT INTO chat_messages(user_message,ai_answer)
+            VALUES(?, ?)
+            """,
+            (
+                user_message,
+                ai_answer,
+            ),
+        )
 
-    conn.commit()
+        conn.commit()
 
-    chat_id = cursor.lastrowid
+        chat_id = cursor.lastrowid
 
-    conn.close()
-
-    return chat_id
+        return chat_id
 
 
 def find_all_chat_messages():
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_connection() as conn:
+        cursor = conn.cursor()
 
-    cursor.execute(
-        """
-    SELECT id, user_message, ai_answer, created_at
-    FROM chat_messages
-    ORDER BY id DESC
-    """
-    )
+        cursor.execute(
+            """
+            SELECT id, user_message, ai_answer, created_at
+            FROM chat_messages
+            ORDER BY id DESC
+            """
+        )
 
-    rows = cursor.fetchall()
+        rows = cursor.fetchall()
 
-    conn.close()
-
-    return rows
+        return rows
 
 
 def find_recent_chat_messages(limit: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_connection() as conn:
+        cursor = conn.cursor()
 
-    cursor.execute(
-        """
-    SELECT id, user_message, ai_answer, created_at
-    FROM chat_messages
-    ORDER BY id DESC
-    LIMIT ?
-    """,
-        (limit,),
-    )
+        cursor.execute(
+            """
+            SELECT id, user_message, ai_answer, created_at
+            FROM chat_messages
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        )
 
-    rows = cursor.fetchall()
+        rows = cursor.fetchall()
 
-    conn.close()
-
-    return rows
+        return rows
 
 
 def delete_all_chat_history():
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_connection() as conn:
+        cursor = conn.cursor()
 
-    cursor.execute(
-        """
-    DELETE FROM chat_messages
-    """
-    )
+        cursor.execute(
+            """
+            DELETE FROM chat_messages
+            """
+        )
 
-    conn.commit()
+        conn.commit()
 
-    deleted = cursor.rowcount
+        deleted = cursor.rowcount
 
-    conn.close()
-
-    return deleted
+        return deleted
 
 
 def save_chat_summary(summary: str):
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_connection() as conn:
 
-    cursor.execute(
-        """
-    INSERT INTO chat_summaries(summary)
-    VALUES(?)
-    """,
-        (summary,),
-    )
+        cursor = conn.cursor()
 
-    conn.commit()
+        cursor.execute(
+            """
+            INSERT INTO chat_summaries(summary)
+            VALUES(?)
+            """,
+            (summary,),
+        )
 
-    summary_id = cursor.lastrowid
+        conn.commit()
 
-    conn.close()
+        summary_id = cursor.lastrowid
 
-    return summary_id
+        return summary_id
 
 
 def find_latest_chat_summary():
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_connection() as conn:
 
-    cursor.execute(
-        """
-    SELECT id, summary, create_at
-    FROM chat_summaries
-    ORDER BY id DESC
-    LIMIT 1
-    """,
-    )
+        cursor = conn.cursor()
 
-    row = cursor.fetchone()
+        cursor.execute(
+            """
+            SELECT id, summary, created_at
+            FROM chat_summaries
+            ORDER BY id DESC
+            LIMIT 1
+            """,
+        )
 
-    conn.close()
+        row = cursor.fetchone()
 
-    return row
-
-
-def total_messages():
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-    SELECT COUNT(*)
-    FROM chat_messages
-    """
-    )
-
-    count = cursor.fetchone()[0]
-
-    conn.close()
-
-    return count
+        return row
 
 
-def total_summaries():
-    conn = get_connection()
-    cursor = conn.cursor()
+def count_chat_messages():
+    with get_connection() as conn:
+        cursor = conn.cursor()
 
-    cursor.execute(
-        """
-    SELECT COUNT(*)
-    FROM chat_summaries
-    """
-    )
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM chat_messages
+            """
+        )
 
-    count = cursor.fetchone()[0]
+        count = cursor.fetchone()[0]
 
-    conn.close()
-
-    return count
+        return count
 
 
-def latest_chat_time():
-    conn = get_connection()
-    cursor = conn.cursor()
+def count_chat_summaries():
+    with get_connection() as conn:
 
-    cursor.execute(
-        """
-    SELECT Max(created_at)
-    FROM chat_messages
-    """
-    )
+        cursor = conn.cursor()
 
-    max = cursor.fetchone()[0]
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM chat_summaries
+            """
+        )
 
-    conn.close()
+        count = cursor.fetchone()[0]
 
-    return max
+        return count
+
+
+def find_latest_chat_time():
+    with get_connection() as conn:
+
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            SELECT Max(created_at)
+            FROM chat_messages
+            """
+        )
+
+        latest_time = cursor.fetchone()[0]
+
+        return latest_time

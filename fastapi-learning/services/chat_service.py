@@ -15,9 +15,9 @@ from repositories.chat_repository import (
     find_recent_chat_messages,
     save_chat_summary,
     find_latest_chat_summary,
-    total_messages,
-    total_summaries,
-    latest_chat_time,
+    count_chat_messages,
+    count_chat_summaries,
+    find_latest_chat_time,
 )
 
 if not OPENAI_API_KEY:
@@ -126,7 +126,7 @@ def get_chat_summary_service():
 
 def get_chat_stats():
     return {
-        "total_messages": total_messages(),
-        "total_summaries": total_summaries(),
-        "latest_chat_time": latest_chat_time(),
+        "total_messages": count_chat_messages(),
+        "total_summaries": count_chat_summaries(),
+        "latest_chat_time": find_latest_chat_time(),
     }
