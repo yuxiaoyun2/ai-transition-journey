@@ -30,7 +30,7 @@ def get_user(user_id: int):
     if not user:
         raise HTTPException(
             status_code=404,
-            detail="user not found",
+            detail="User not found",
         )
 
     return user
@@ -75,4 +75,4 @@ def delete_exixting_user(user_id: int):
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return {"message": "user deleted"}
+    return {"message": "User deleted"}

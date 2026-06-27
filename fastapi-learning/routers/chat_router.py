@@ -24,15 +24,9 @@ router = APIRouter()
     response_model=ChatResponse,
 )
 def chat(request: ChatRequest):
-    try:
-        answer = generate_answer(request.message)
-        return {"answer": answer}
+    answer = generate_answer(request.message)
 
-    except Exception:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to generate AI response",
-        )
+    return {"answer": answer}
 
 
 @router.get(
@@ -48,8 +42,11 @@ def chat_history():
     response_model=ChatMessageResponse,
 )
 def delete_chat_history_api():
-    delete_chat_history()
-    return {"message": "all chat deleted"}
+    deleted = delete_chat_history()
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Chat history not found")
+    return {"message": "All chat history deleted"}
 
 
 @router.post(

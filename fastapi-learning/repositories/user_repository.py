@@ -2,103 +2,93 @@ from database import get_connection
 
 
 def find_all():
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_connection() as conn:
+        cursor = conn.cursor()
 
-    cursor.execute(
-        """
-        SELECT id, name
-        FROM users
-        """
-    )
+        cursor.execute(
+            """
+            SELECT id, name
+            FROM users
+            """
+        )
 
-    rows = cursor.fetchall()
+        rows = cursor.fetchall()
 
-    conn.close()
-
-    return rows
+        return rows
 
 
 def find_by_id(user_id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_connection() as conn:
+        cursor = conn.cursor()
 
-    cursor.execute(
-        """
-        SELECT id , name
-        FROM users
-        WHERE id = ?
-        """,
-        (user_id,),
-    )
+        cursor.execute(
+            """
+            SELECT id, name
+            FROM users
+            WHERE id = ?
+            """,
+            (user_id,),
+        )
 
-    row = cursor.fetchone()
+        row = cursor.fetchone()
 
-    conn.close()
-
-    return row
+        return row
 
 
 def save(name: str):
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_connection() as conn:
+        cursor = conn.cursor()
 
-    cursor.execute(
-        """
-        INSERT INTO users(name)
-        VALUES(?)
-        """,
-        (name,),
-    )
+        cursor.execute(
+            """
+            INSERT INTO users(name)
+            VALUES(?)
+            """,
+            (name,),
+        )
 
-    conn.commit()
+        conn.commit()
 
-    user_id = cursor.lastrowid
+        user_id = cursor.lastrowid
 
-    conn.close()
-
-    return user_id
+        return user_id
 
 
-def update(user_id, name: str):
-    conn = get_connection()
-    cursor = conn.cursor()
+def update(user_id: int, name: str):
+    with get_connection() as conn:
+        cursor = conn.cursor()
 
-    cursor.execute(
-        """
-        UPDATE users
-        SET name = ?
-        WHERE id = ?
-        """,
-        (name, user_id),
-    )
+        cursor.execute(
+            """
+            UPDATE users
+            SET name = ?
+            WHERE id = ?
+            """,
+            (name, user_id),
+        )
 
-    conn.commit()
+        conn.commit()
 
-    updated = cursor.rowcount
+        updated = cursor.rowcount
 
-    conn.close()
-
-    return updated
+        return updated
 
 
 def delete(user_id: int):
+    with get_connection() as conn:
 
-    conn = get_connection()
-    cursor = conn.cursor()
+        cursor = conn.cursor()
 
-    cursor.execute(
-        """
-        DELETE FROM users
-        WHERE id = ?
-        """,
-        (user_id,),
-    )
+        cursor.execute(
+            """
+            DELETE FROM users
+            WHERE id = ?
+            """,
+            (user_id,),
+        )
 
-    conn.commit()
+        conn.commit()
 
-    deleted = cursor.rowcount
+        deleted = cursor.rowcount
 
-    conn.close()
-
-    return deleted
+        return deleted
