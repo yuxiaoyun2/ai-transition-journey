@@ -42,10 +42,8 @@ def chat_history():
     response_model=ChatMessageResponse,
 )
 def delete_chat_history_api():
-    deleted = delete_chat_history()
+    delete_chat_history()
 
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Chat history not found")
     return {"message": "All chat history deleted"}
 
 

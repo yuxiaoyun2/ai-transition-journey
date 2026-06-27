@@ -68,7 +68,7 @@ def update_existing_user(
     "/users/{user_id}",
     response_model=MessageResponse,
 )
-def delete_exixting_user(user_id: int):
+def delete_existing_user(user_id: int):
 
     success = delete_user(user_id)
 
