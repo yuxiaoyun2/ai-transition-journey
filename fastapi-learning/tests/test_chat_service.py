@@ -1,7 +1,8 @@
 from services import chat_service
 from config import SYSTEM_PROMPT
-from unittest.mock import patch, Mock
-import unittest
+from unittest.mock import patch, Mock, MagicMock
+
+import pytest
 
 rows = [(1, "hello", "hi", "...")]
 
@@ -41,3 +42,17 @@ def test_generate_answer(
     mock_save_chat_message.assert_called_once_with(
         user_message="hello", ai_answer="open ai answer"
     )
+
+
+@patch("services.chat_service.client.chat.completions.create")
+@patch("services.chat_service.get_recent_chat_rows")
+def test_generate_answer_error(
+    mock_get_recent_chat_rows: MagicMock, mock_create: MagicMock
+):
+    mock_get_recent_chat_rows.return_value = []
+    mock_create.side_effect = Exception("OpenAI Error")
+
+    with pytest.raises(Exception) as exc_info:
+        chat_service.generate_answer("hello")
+
+    assert str(exc_info.value) == "OpenAI Error"
