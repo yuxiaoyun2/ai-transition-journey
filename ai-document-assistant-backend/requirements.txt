@@ -32,6 +32,7 @@ Pygments==2.20.0
 pytest==8.4.2
 python-discovery==1.4.0
 python-dotenv==1.2.1
+python-multipart==0.0.20
 pytokens==0.4.1
 PyYAML==6.0.3
 six @ file:///AppleInternal/Library/BuildRoots/4~CKgHugAcJujzKlRoChleiLcli8Pvfh2Zw9NQTKg/Library/Caches/com.apple.xbs/Sources/python3/six-1.15.0-py2.py3-none-any.whl

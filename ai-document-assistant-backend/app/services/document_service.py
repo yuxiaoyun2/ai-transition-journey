@@ -1,6 +1,11 @@
 from app.repositories.document_repository import DocumentRepository
 from typing import Optional
 from app.models.document import Document
+import os
+import shutil
+from fastapi import UploadFile
+
+UPLOAD_DIR = "uploads"
 
 
 class DocumentService:
@@ -25,3 +30,25 @@ class DocumentService:
 
         self.repository.delete(doc)
         return True
+
+    def save_uploaded_file(self, file: UploadFile) -> str:
+        if not UPLOAD_DIR:
+            os.makedirs(UPLOAD_DIR)
+
+        file_path = os.path.join(UPLOAD_DIR, file.filename)
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        return file.filename
+
+    def upload_document(self, title: str, file: UploadFile) -> Document:
+        filename = self.save_uploaded_file(file)
+        doc = Document(
+            title=title,
+            content=None,
+            file_name=filename,
+            summary=None,
+        )
+
+        return self.repository.insert(doc)
