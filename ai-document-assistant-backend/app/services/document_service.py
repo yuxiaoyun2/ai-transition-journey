@@ -1,28 +1,34 @@
 from app.repositories.document_repository import DocumentRepository
-from typing import Optional
 from app.models.document import Document
+from app.ai.ai_client import AIClient
+
 import os
 import shutil
+from typing import Optional
+
 from fastapi import UploadFile
+import pypdf
+
 
 UPLOAD_DIR = "uploads"
 
 
 class DocumentService:
-    def __init__(self, repository: DocumentRepository):
+    def __init__(self, repository: DocumentRepository, ai_client: AIClient):
         self.repository = repository
+        self.ai_client = ai_client
 
     def create_doc(self, title: str, content: str) -> Document:
         doc = Document(title=title, content=content)
         return self.repository.insert(doc)
 
-    def get_all_documnets(self) -> list[Document]:
+    def get_all_documents(self) -> list[Document]:
         return self.repository.find_all()
 
     def get_doc_by_id(self, document_id: int) -> Optional[Document]:
         return self.repository.find_by_id(document_id)
 
-    def romove_document(self, document_id: int):
+    def remove_document(self, document_id: int):
         doc = self.repository.find_by_id(document_id)
 
         if doc is None:
@@ -31,24 +37,40 @@ class DocumentService:
         self.repository.delete(doc)
         return True
 
-    def save_uploaded_file(self, file: UploadFile) -> str:
-        if not UPLOAD_DIR:
-            os.makedirs(UPLOAD_DIR)
-
-        file_path = os.path.join(UPLOAD_DIR, file.filename)
-
+    def save_uploaded_file(self, file: UploadFile, file_path: str) -> str:
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
         return file.filename
 
     def upload_document(self, title: str, file: UploadFile) -> Document:
-        filename = self.save_uploaded_file(file)
+        if not UPLOAD_DIR:
+            os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+        file_path = os.path.join(UPLOAD_DIR, file.filename)
+
+        filename = self.save_uploaded_file(file, file_path)
+
+        text = self.pdf_to_text(file_path)
+        summary = self.ai_client.generate_summary(text)
+
         doc = Document(
             title=title,
-            content=None,
+            content=text,
             file_name=filename,
-            summary=None,
+            summary=summary,
         )
 
         return self.repository.insert(doc)
+
+    def pdf_to_text(self, path) -> str:
+        reader = pypdf.PdfReader(path)
+
+        text = ""
+
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text + "\n"
+
+        return text

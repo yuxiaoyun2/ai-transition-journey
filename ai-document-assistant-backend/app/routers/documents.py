@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from app.schemas.document import DocumentCreate, DocumentResponse, MessageResponse
 from app.services.document_service import DocumentService
 from app.repositories.document_repository import DocumentRepository
+from app.ai.ai_client import AIClient
 from sqlalchemy.orm import Session
 from app.database import get_db
 
@@ -11,7 +12,8 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 
 def get_document_service(db: Session = Depends(get_db)) -> DocumentService:
     repository = DocumentRepository(db)
-    return DocumentService(repository)
+    ai_client = AIClient()
+    return DocumentService(repository, ai_client)
 
 
 @router.post("", status_code=201, response_model=DocumentResponse)
@@ -31,7 +33,7 @@ def list_docs(
         get_document_service,
     )
 ):
-    return service.get_all_documnets()
+    return service.get_all_documents()
 
 
 @router.get("/{document_id}", response_model=DocumentResponse)
@@ -51,7 +53,7 @@ def delete_doc(
     document_id,
     service: DocumentService = Depends(get_document_service),
 ):
-    deleted = service.romove_document(document_id)
+    deleted = service.remove_document(document_id)
 
     if not deleted:
         raise HTTPException(status_code=404, detail="Document not found")
