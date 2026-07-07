@@ -33,6 +33,14 @@ def create_doc(
     )
 
 
+@router.get("/search", response_model=list[DocumentResponse])
+def documents_search(
+    keyword: str,
+    service: DocumentService = Depends(get_document_service),
+):
+    return service.get_docs_by_keyword(keyword)
+
+
 @router.get("", response_model=list[DocumentResponse])
 def list_docs(
     service: DocumentService = Depends(

@@ -87,3 +87,6 @@ class DocumentService:
             raise ValueError("Document content is empty")
 
         return self.ai_client.generate_chat(doc.content, request.question)
+
+    def get_docs_by_keyword(self, keyword: str) -> list[Document]:
+        return self.repository.find_by_keyword(keyword)
