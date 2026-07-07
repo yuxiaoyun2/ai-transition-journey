@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from app.models.document import Document
 from typing import Optional
-from sqlalchemy import or_
+from sqlalchemy import or_, desc
 
 
 class DocumentRepository:
@@ -15,8 +15,14 @@ class DocumentRepository:
         self.db.refresh(obj)
         return obj
 
-    def find_all(self) -> list[Document]:
-        return self.db.query(self.model).all()
+    def find_all(self, limit: int, offset: int) -> list[Document]:
+        query = (
+            self.db.query(self.model)
+            .order_by(desc(self.model.id))
+            .offset(offset)
+            .limit(limit)
+        )
+        return query.all()
 
     def find_by_id(self, _id: int) -> Optional[Document]:
         return self.db.get(Document, _id)

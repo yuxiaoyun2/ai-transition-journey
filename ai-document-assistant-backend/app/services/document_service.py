@@ -23,8 +23,8 @@ class DocumentService:
         doc = Document(title=title, content=content)
         return self.repository.insert(doc)
 
-    def get_all_documents(self) -> list[Document]:
-        return self.repository.find_all()
+    def get_all_documents(self, limit: int, offset: int) -> list[Document]:
+        return self.repository.find_all(limit, offset)
 
     def get_doc_by_id(self, document_id: int) -> Optional[Document]:
         return self.repository.find_by_id(document_id)
