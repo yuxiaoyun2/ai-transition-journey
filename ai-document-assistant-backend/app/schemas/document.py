@@ -23,3 +23,12 @@ class DocumentResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+
+class ChatRequest(BaseModel):
+    document_id: int
+    question: str
+
+
+class ChatResponse(BaseModel):
+    answer: str

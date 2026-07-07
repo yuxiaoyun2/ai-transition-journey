@@ -1,5 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
-from app.schemas.document import DocumentCreate, DocumentResponse, MessageResponse
+from app.schemas.document import (
+    DocumentCreate,
+    DocumentResponse,
+    MessageResponse,
+    ChatRequest,
+    ChatResponse,
+)
 from app.services.document_service import DocumentService
 from app.repositories.document_repository import DocumentRepository
 from app.ai.ai_client import AIClient
@@ -68,3 +74,15 @@ def upload_doc(
     service: DocumentService = Depends(get_document_service),
 ):
     return service.upload_document(title=title, file=file)
+
+
+@router.post("/chat", response_model=ChatResponse)
+def chat_with_doc(
+    request: ChatRequest,
+    service: DocumentService = Depends(get_document_service),
+):
+    try:
+        answer = service.chat_with_doc(request)
+        return {"answer": answer}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))

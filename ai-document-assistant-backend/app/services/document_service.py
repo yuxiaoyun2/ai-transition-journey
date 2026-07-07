@@ -1,6 +1,7 @@
 from app.repositories.document_repository import DocumentRepository
 from app.models.document import Document
 from app.ai.ai_client import AIClient
+from app.schemas.document import ChatRequest
 
 import os
 import shutil
@@ -52,6 +53,7 @@ class DocumentService:
         filename = self.save_uploaded_file(file, file_path)
 
         text = self.pdf_to_text(file_path)
+
         summary = self.ai_client.generate_summary(text)
 
         doc = Document(
@@ -74,3 +76,14 @@ class DocumentService:
                 text += page_text + "\n"
 
         return text
+
+    def chat_with_doc(self, request: ChatRequest):
+        doc = self.get_doc_by_id(request.document_id)
+
+        if doc is None:
+            raise ValueError("no exists docment")
+
+        if not doc.content:
+            raise ValueError("Document content is empty")
+
+        return self.ai_client.generate_chat(doc.content, request.question)
