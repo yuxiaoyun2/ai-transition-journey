@@ -45,3 +45,6 @@ class DocumentRepository:
             query = query.limit(limit)
 
         return query.all()
+
+    def count(self) -> int:
+        return self.db.query(self.model).count()

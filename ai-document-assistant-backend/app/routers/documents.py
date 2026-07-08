@@ -5,6 +5,7 @@ from app.schemas.document import (
     MessageResponse,
     ChatRequest,
     ChatResponse,
+    DocumentListResponse,
 )
 from app.services.document_service import DocumentService
 from app.repositories.document_repository import DocumentRepository
@@ -41,7 +42,7 @@ def documents_search(
     return service.get_docs_by_keyword(keyword)
 
 
-@router.get("", response_model=list[DocumentResponse])
+@router.get("", response_model=DocumentListResponse)
 def list_docs(
     limit: int = Query(default=10, ge=1, le=100),
     offset: int = Query(default=0, ge=0),

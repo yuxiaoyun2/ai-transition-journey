@@ -32,3 +32,10 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     answer: str
+
+
+class DocumentListResponse(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    items: list[DocumentResponse]
