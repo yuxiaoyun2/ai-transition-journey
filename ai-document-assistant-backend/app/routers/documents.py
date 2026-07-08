@@ -12,6 +12,10 @@ from app.repositories.document_repository import DocumentRepository
 from app.ai.ai_client import AIClient
 from sqlalchemy.orm import Session
 from app.database import get_db
+from app.exceptions.custom_exceptions import (
+    DocumentContentEmptyError,
+    DocumentNotFoundError,
+)
 
 
 router = APIRouter(prefix="/documents", tags=["documents"])
@@ -60,7 +64,7 @@ def get_doc(
 ):
     doc = service.get_doc_by_id(document_id)
     if doc is None:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise DocumentNotFoundError
 
     return doc
 
@@ -73,7 +77,7 @@ def delete_doc(
     deleted = service.remove_document(document_id)
 
     if not deleted:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise DocumentNotFoundError
 
     return {"message": "deleted success"}
 
@@ -92,8 +96,5 @@ def chat_with_doc(
     request: ChatRequest,
     service: DocumentService = Depends(get_document_service),
 ):
-    try:
-        answer = service.chat_with_doc(request)
-        return {"answer": answer}
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    answer = service.chat_with_doc(request)
+    return {"answer": answer}

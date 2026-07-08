@@ -2,6 +2,10 @@ from app.repositories.document_repository import DocumentRepository
 from app.models.document import Document
 from app.ai.ai_client import AIClient
 from app.schemas.document import ChatRequest
+from app.exceptions.custom_exceptions import (
+    DocumentContentEmptyError,
+    DocumentNotFoundError,
+)
 
 import os
 import shutil
@@ -83,10 +87,10 @@ class DocumentService:
         doc = self.get_doc_by_id(request.document_id)
 
         if doc is None:
-            raise ValueError("no exists docment")
+            raise DocumentNotFoundError()
 
         if not doc.content:
-            raise ValueError("Document content is empty")
+            raise DocumentContentEmptyError()
 
         return self.ai_client.generate_chat(doc.content, request.question)
 
