@@ -6,6 +6,7 @@ from app.exceptions.custom_exceptions import (
     DocumentContentEmptyError,
     DocumentNotFoundError,
 )
+from app.core.logger import logger
 
 import os
 import shutil
@@ -24,6 +25,7 @@ class DocumentService:
         self.ai_client = ai_client
 
     def create_doc(self, title: str, content: str) -> Document:
+        logger.info("create document")
         doc = Document(title=title, content=content)
         return self.repository.insert(doc)
 
@@ -57,6 +59,8 @@ class DocumentService:
         file_path = os.path.join(UPLOAD_DIR, file.filename)
 
         filename = self.save_uploaded_file(file, file_path)
+
+        logger.info(f"Uploaded file: {filename}")
 
         text = self.pdf_to_text(file_path)
 

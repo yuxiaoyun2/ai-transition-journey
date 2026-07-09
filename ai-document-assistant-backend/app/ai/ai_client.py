@@ -1,4 +1,5 @@
 from app.config import OPENAI_API_KEY, SUMMARY_PROMPT, OPENAI_MODEL, PROMPT
+from app.core.logger import logger
 from openai import OpenAI
 
 
@@ -23,6 +24,8 @@ class AIClient:
                 },
             ],
         )
+
+        logger.info("Generate AI summary")
 
         answer = response.choices[0].message.content
 
