@@ -31,7 +31,7 @@ class AIClient:
 
         return answer
 
-    def generate_chat(self, text: str, message: str) -> str:
+    def generate_chat(self, doc_text: str, question: str) -> str:
         response = self.client.chat.completions.create(
             model=OPENAI_MODEL,
             messages=[
@@ -43,10 +43,10 @@ class AIClient:
                     "role": "user",
                     "content": f"""
                     Document:
-                    {text}
+                    {doc_text}
                     
                     Question:
-                    {message}
+                    {question}
                     """,
                 },
             ],

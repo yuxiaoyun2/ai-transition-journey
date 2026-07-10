@@ -96,7 +96,9 @@ class DocumentService:
         if not doc.content:
             raise DocumentContentEmptyError()
 
-        return self.ai_client.generate_chat(doc.content, request.question)
+        return self.ai_client.generate_chat(
+            doc_text=doc.content, question=request.question
+        )
 
     def get_docs_by_keyword(self, keyword: str) -> list[Document]:
         return self.repository.find_by_keyword(keyword)
