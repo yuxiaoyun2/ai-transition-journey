@@ -1,5 +1,3 @@
-from unittest.mock import MagicMock
-
 import pytest
 
 from app.exceptions.custom_exceptions import (
@@ -8,13 +6,9 @@ from app.exceptions.custom_exceptions import (
 )
 from app.models.document import Document
 from app.schemas.document import ChatRequest
-from app.services.document_service import DocumentService
 
 
-def test_chat_with_doc_success():
-    repository = MagicMock()
-    ai_client = MagicMock()
-
+def test_chat_with_doc_success(repository, ai_client, service):
     document = Document(
         id=1,
         title="Test Document",
@@ -23,8 +17,6 @@ def test_chat_with_doc_success():
 
     repository.find_by_id.return_value = document
     ai_client.generate_chat.return_value = "契約期間は1年間です。"
-
-    service = DocumentService(repository, ai_client)
 
     request = ChatRequest(
         document_id=1,
@@ -41,13 +33,8 @@ def test_chat_with_doc_success():
     )
 
 
-def test_chat_with_doc_document_not_found():
-    repository = MagicMock()
-    ai_client = MagicMock()
-
+def test_chat_with_doc_document_not_found(repository, ai_client, service):
     repository.find_by_id.return_value = None
-
-    service = DocumentService(repository, ai_client)
 
     request = ChatRequest(
         document_id=999,
@@ -60,10 +47,7 @@ def test_chat_with_doc_document_not_found():
     ai_client.generate_chat.assert_not_called()
 
 
-def test_chat_with_doc_content_empty():
-    repository = MagicMock()
-    ai_client = MagicMock()
-
+def test_chat_with_doc_content_empty(repository, ai_client, service):
     document = Document(
         id=1,
         title="Test Document",
@@ -71,8 +55,6 @@ def test_chat_with_doc_content_empty():
     )
 
     repository.find_by_id.return_value = document
-
-    service = DocumentService(repository, ai_client)
 
     request = ChatRequest(
         document_id=1,
