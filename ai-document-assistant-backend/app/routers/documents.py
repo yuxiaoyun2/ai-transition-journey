@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Query
+from fastapi import APIRouter, Depends, File, UploadFile, Query
 from app.schemas.document import (
     DocumentCreate,
     DocumentResponse,
@@ -13,7 +13,6 @@ from app.ai.ai_client import AIClient
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.exceptions.custom_exceptions import (
-    DocumentContentEmptyError,
     DocumentNotFoundError,
 )
 
