@@ -1,5 +1,5 @@
-pytest
+pytest==8.4.2
 
-black
+black==25.11.0
 
-httpx
+httpx==0.28.1
