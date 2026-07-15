@@ -14,6 +14,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      OPENAI_API_KEY: test-key
+
     defaults:
       run:
         working-directory: ai-document-assistant-backend
