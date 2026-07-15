@@ -4,13 +4,19 @@ on:
   push:
     branches:
       - main
-      - develop
+    paths:
+      - "ai-document-assistant-backend/**"
+      - ".github/workflows/ai-document-ci.yml"
 
   pull_request:
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ai-document-assistant-backend
 
     steps:
       - name: Checkout
@@ -22,21 +28,17 @@ jobs:
         uses: actions/setup-python@v5
 
         with:
-
           python-version: "3.11"
 
       - name: Install dependencies
-
         run:
-
           python -m pip install --upgrade pip
-
           pip install -r requirements-dev.txt
 
-      - name: Run pytest
+      - name: Check formatting
+        run:python -m black --check.
 
-        run:
-
-          pytest
+      - name: Run Tests
+        run:python -m pytest -v
 
 
