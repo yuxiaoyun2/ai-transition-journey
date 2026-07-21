@@ -4,14 +4,16 @@ from agents import function_tool
 
 from app.repositories.task_repository import TaskRepository
 
-repository = TaskRepository()
+from app.database import SessionLocal
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @function_tool
 def get_current_datetime() -> str:
     """Return the current server date and time."""
-
-    print("get_current_datetime tool was called")
 
     current_datetime = datetime.now()
 
@@ -19,12 +21,65 @@ def get_current_datetime() -> str:
 
 
 @function_tool
-def create_task(title: str) -> str:
-    """Create a new task and return its title."""
-    return repository.create_task(title=title)
+def create_task(title: str) -> dict:
+    """
+    Create a new task.
+
+    Args:
+        title: Task title.
+
+    Returns:
+        Created task information.
+    """
+    db = SessionLocal()
+    logger.info("create_task tool was called: title=%s", title)
+    try:
+        repository = TaskRepository(db)
+        task = repository.create(title=title)
+
+        result = {
+            "id": task.id,
+            "title": task.title,
+            "create_at": task.created_at.isoformat(),
+        }
+
+        logger.info("Task created successfully: %s", result)
+        return result
+
+    except Exception as e:
+        db.rollback()
+        logger.exception("failed to create task: %s", e)
+
+    finally:
+        db.close()
 
 
 @function_tool
-def get_tasks() -> list[str]:
-    """get tasks and return them."""
-    return repository.get_tasks()
+def get_tasks() -> list[dict]:
+    """
+    Get all tasks.
+
+    Returns:
+        A list of task information.
+    """
+    db = SessionLocal()
+    logger.info("get_tasks tool was called")
+    try:
+        repository = TaskRepository(db)
+        tasks = repository.get_tasks()
+
+        result = [
+            {
+                "id": task.id,
+                "title": task.title,
+            }
+            for task in tasks
+        ]
+        logger.info("Tasks get successfully: %s", result)
+        return result
+
+    except Exception as e:
+        logger.exception("failed to get tasks: %s", e)
+
+    finally:
+        db.close()

@@ -2,7 +2,10 @@ import app.core.openai_init
 
 from fastapi import FastAPI
 
+from app.database import Base, engine
 from app.routers.agent_router import router as agent_router
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="AI Agent Backend",
