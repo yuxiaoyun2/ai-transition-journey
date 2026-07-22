@@ -6,6 +6,7 @@ from app.tools.task_tools import (
     get_tasks,
     get_task_by_id,
     delete_task,
+    search_tasks,
 )
 
 task_agent = Agent(
@@ -20,6 +21,7 @@ task_agent = Agent(
         "When the user asks to view tasks,use the get_tasks tool. "
         "When the user asks to view a specific task, use the get_task_by_id tool. "
         "When the user asks to delete a task, use the delete_task tool. "
+        "When the user asks to search tasks by keyword, use the search_tasks tool. "
         "If the user writes in Japanese, answer in Japanese. "
         "If the user writes in Chinese, answer in Chinese. "
     ),
@@ -29,5 +31,6 @@ task_agent = Agent(
         get_tasks,
         get_task_by_id,
         delete_task,
+        search_tasks,
     ],
 )

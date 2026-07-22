@@ -156,3 +156,41 @@ def delete_task(task_id: int) -> dict:
 
     finally:
         db.close()
+
+
+@function_tool
+def search_tasks(keyword: str) -> list[dict]:
+    """
+    search tasks by title keyword.
+
+    Args:
+        keyword: a keyword contained in the task title.
+
+    Returns:
+        a list of matching task information.
+    """
+    db = SessionLocal()
+    try:
+        repository = TaskRepository(db)
+        tasks = repository.search_tasks(keyword)
+
+        result = [
+            {
+                "id": task.id,
+                "title": task.title,
+            }
+            for task in tasks
+        ]
+        logger.info(
+            "Tasks searched successfully: keyword = %s, count = %s",
+            keyword,
+            len(tasks),
+        )
+        return result
+
+    except Exception:
+        logger.exception("failed to search tasks: keyword = %s", keyword)
+        raise
+
+    finally:
+        db.close()

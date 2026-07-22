@@ -30,3 +30,15 @@ class TaskRepository:
         self.db.commit()
 
         return True
+
+    def search_tasks(self, keyword: str) -> list[Task]:
+        clean_keyword = keyword.strip()
+
+        if not clean_keyword:
+            return []
+
+        return (
+            self.db.query(self.model)
+            .filter(self.model.title.contains(clean_keyword))
+            .all()
+        )
