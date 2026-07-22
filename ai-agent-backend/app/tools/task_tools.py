@@ -49,6 +49,7 @@ def create_task(title: str) -> dict:
     except Exception as e:
         db.rollback()
         logger.exception("failed to create task: %s", e)
+        raise
 
     finally:
         db.close()
@@ -80,6 +81,78 @@ def get_tasks() -> list[dict]:
 
     except Exception as e:
         logger.exception("failed to get tasks: %s", e)
+        raise
+
+    finally:
+        db.close()
+
+
+@function_tool
+def get_task_by_id(task_id: int) -> dict:
+    """
+    Retrieve a task by ID.
+
+    Args:
+        id (int): the task ID
+
+    Returns:
+        dict: return information or a not-found result.
+    """
+    db = SessionLocal()
+    try:
+        repository = TaskRepository(db)
+        task = repository.get_task(task_id)
+
+        if task is None:
+            return {"success": False, "message": f"Task {task_id} was not found."}
+
+        return {
+            "success": True,
+            "task": {
+                "id": task.id,
+                "title": task.title,
+            },
+        }
+
+    except Exception:
+        logger.exception("faild to get task_id= %s", task_id)
+        raise
+
+    finally:
+        db.close()
+
+
+@function_tool
+def delete_task(task_id: int) -> dict:
+    """delete a task by its ID.
+
+    Args:
+        task_id: the Task ID.
+
+    Returns:
+        The deletion result.
+    """
+    db = SessionLocal()
+    try:
+        repository = TaskRepository(db)
+
+        deleted = repository.delete_task(task_id)
+
+        if not deleted:
+            return {
+                "success": False,
+                "message": f"Task {task_id} was not found.",
+            }
+
+        return {
+            "success": True,
+            "message": f"Task {task_id} was deleted.",
+        }
+
+    except Exception:
+        db.rollback()
+        logger.exception("faild to delete task: task_id = %s", task_id)
+        raise
 
     finally:
         db.close()
