@@ -115,7 +115,7 @@ def get_task_by_id(task_id: int) -> dict:
         }
 
     except Exception:
-        logger.exception("faild to get task_id= %s", task_id)
+        logger.exception("failed to get task_id= %s", task_id)
         raise
 
     finally:
@@ -151,7 +151,7 @@ def delete_task(task_id: int) -> dict:
 
     except Exception:
         db.rollback()
-        logger.exception("faild to delete task: task_id = %s", task_id)
+        logger.exception("failed to delete task: task_id = %s", task_id)
         raise
 
     finally:
@@ -190,6 +190,51 @@ def search_tasks(keyword: str) -> list[dict]:
 
     except Exception:
         logger.exception("failed to search tasks: keyword = %s", keyword)
+        raise
+
+    finally:
+        db.close()
+
+
+@function_tool
+def update_task(task_id: int, title: str) -> dict:
+    """
+    update task title by task ID.
+
+    Args:
+        task_id (int): task ID
+        title (str): the new task title
+
+    Returns:
+        dict: The update result and updated Task information.
+    """
+
+    db = SessionLocal()
+    try:
+        repository = TaskRepository(db)
+        task = repository.update_task(task_id, title)
+
+        if task is None:
+            return {
+                "success": False,
+                "message": f"Task {task_id} was not found.",
+            }
+
+        return {
+            "success": True,
+            "task": {
+                "id": task.id,
+                "title": task.title,
+            },
+        }
+
+    except Exception:
+        db.rollback()
+        logger.exception(
+            "failed to update task: task_id = %s, title = %s ",
+            task_id,
+            title,
+        )
         raise
 
     finally:

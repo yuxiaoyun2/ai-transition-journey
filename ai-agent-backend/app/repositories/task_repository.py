@@ -42,3 +42,21 @@ class TaskRepository:
             .filter(self.model.title.contains(clean_keyword))
             .all()
         )
+
+    def update_task(self, task_id: int, title: str) -> Task | None:
+        clean_title = title.strip()
+
+        if not clean_title:
+            raise ValueError("Task title connot be empty.")
+
+        task = self.db.get(self.model, task_id)
+
+        if task is None:
+            return None
+
+        task.title = title
+
+        self.db.commit()
+        self.db.refresh(task)
+
+        return task
