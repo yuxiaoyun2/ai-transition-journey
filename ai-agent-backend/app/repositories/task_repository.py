@@ -1,5 +1,10 @@
 from sqlalchemy.orm import Session
 from app.models.task import Task
+from app.exceptions.task_exceptions import (
+    TaskNotFoundError,
+    TaskTitleEmptyError,
+    TaskAlreadyExistsError,
+)
 
 
 class TaskRepository:
@@ -9,27 +14,42 @@ class TaskRepository:
         self.model = Task
 
     def create(self, title: str) -> Task:
-        task = Task(title=title)
+        clean_title = title
+
+        if not clean_title:
+            raise TaskTitleEmptyError()
+
+        existing_task = (
+            self.db.query(self.model).filter(self.model.title == clean_title).first()
+        )
+        if existing_task is not None:
+            raise TaskAlreadyExistsError(f"Task {clean_title} already exists.")
+
+        task = Task(title=clean_title)
         self.db.add(task)
         self.db.commit()
         self.db.refresh(task)
+
         return task
 
     def get_tasks(self) -> list[Task]:
         return self.db.query(self.model).all()
 
-    def get_task(self, _task_id: int) -> Task | None:
-        return self.db.get(self.model, _task_id)
+    def get_task(self, task_id: int) -> Task:
+        task = self.db.get(self.model, task_id)
 
-    def delete_task(self, task_id: int) -> bool:
+        if task is None:
+            raise TaskNotFoundError(f"Task {task_id} was not found.")
+
+        return task
+
+    def delete_task(self, task_id: int) -> None:
         task = self.db.get(self.model, task_id)
         if task is None:
-            return False
+            raise TaskNotFoundError(f"Task {task_id} was not found")
 
         self.db.delete(task)
         self.db.commit()
-
-        return True
 
     def search_tasks(self, keyword: str) -> list[Task]:
         clean_keyword = keyword.strip()
@@ -43,18 +63,18 @@ class TaskRepository:
             .all()
         )
 
-    def update_task(self, task_id: int, title: str) -> Task | None:
+    def update_task(self, task_id: int, title: str) -> Task:
         clean_title = title.strip()
 
         if not clean_title:
-            raise ValueError("Task title connot be empty.")
+            raise TaskTitleEmptyError()
 
         task = self.db.get(self.model, task_id)
 
         if task is None:
-            return None
+            raise TaskNotFoundError(f"Task {task_id} not found.")
 
-        task.title = title
+        task.title = clean_title
 
         self.db.commit()
         self.db.refresh(task)

@@ -1,12 +1,14 @@
 from datetime import datetime
-
 from agents import function_tool
 
 from app.repositories.task_repository import TaskRepository
-
 from app.database import SessionLocal
-
 from app.schemas.task_schema import TaskResponse, TaskItem, TaskListResponse
+from app.exceptions.task_exceptions import (
+    TaskNotFoundError,
+    TaskTitleEmptyError,
+    TaskAlreadyExistsError,
+)
 
 import logging
 
@@ -48,12 +50,29 @@ def create_task(title: str) -> TaskResponse:
             ),
         )
 
-        logger.info("Task created successfully: %s", result)
+        logger.info(
+            "Task created successfully: %s",
+            result,
+        )
         return result
 
-    except Exception as e:
+    except (TaskTitleEmptyError, TaskAlreadyExistsError) as exc:
         db.rollback()
-        logger.exception("failed to create task: %s", e)
+        logger.warning(
+            "Task created failed: %s",
+            exc,
+        )
+        return TaskResponse(
+            success=False,
+            message=str(exc),
+        )
+
+    except Exception:
+        db.rollback()
+        logger.exception(
+            "Unexpected error while creating task: task_title = %s",
+            title,
+        )
         raise
 
     finally:
@@ -86,11 +105,14 @@ def get_tasks() -> TaskListResponse:
             message="Tasks retrieved successfully.",
             tasks=task_items,
         )
-        logger.info("Tasks retrieved successfully: %s", result)
+        logger.info(
+            "Tasks retrieved successfully: %s",
+            result,
+        )
         return result
 
-    except Exception as e:
-        logger.exception("failed to get tasks: %s", e)
+    except Exception:
+        logger.exception("Unexpected error while getting task list")
         raise
 
     finally:
@@ -106,18 +128,12 @@ def get_task_by_id(task_id: int) -> TaskResponse:
         task_id: the task ID
 
     Returns:
-        dict: return information or a not-found result.
+        TaskResponse: The task information or a not-found result.
     """
     db = SessionLocal()
     try:
         repository = TaskRepository(db)
         task = repository.get_task(task_id)
-
-        if task is None:
-            return TaskResponse(
-                success=False,
-                message=f"Task {task_id} was not found.",
-            )
 
         return TaskResponse(
             success=True,
@@ -127,9 +143,21 @@ def get_task_by_id(task_id: int) -> TaskResponse:
                 title=task.title,
             ),
         )
+    except TaskNotFoundError as exc:
+        logger.warning(
+            "Task was not found: task_id=%s",
+            task_id,
+        )
+        return TaskResponse(
+            success=False,
+            message=str(exc),
+        )
 
     except Exception:
-        logger.exception("failed to get task_id= %s", task_id)
+        logger.exception(
+            "Unexpected error while getting task: task_id = %s",
+            task_id,
+        )
         raise
 
     finally:
@@ -149,23 +177,30 @@ def delete_task(task_id: int) -> TaskResponse:
     db = SessionLocal()
     try:
         repository = TaskRepository(db)
-
-        deleted = repository.delete_task(task_id)
-
-        if not deleted:
-            return TaskResponse(
-                success=False,
-                message=f"Task {task_id} was not found.",
-            )
+        repository.delete_task(task_id)
 
         return TaskResponse(
             success=True,
             message=f"Task {task_id} was deleted.",
         )
 
+    except TaskNotFoundError as exc:
+        logger.warning(
+            "failed to delete task: task_id = %s",
+            task_id,
+        )
+
+        return TaskResponse(
+            success=False,
+            message=str(exc),
+        )
+
     except Exception:
         db.rollback()
-        logger.exception("failed to delete task: task_id = %s", task_id)
+        logger.exception(
+            "Unexpected error while deleting task: task_id = %s",
+            task_id,
+        )
         raise
 
     finally:
@@ -208,7 +243,10 @@ def search_tasks(keyword: str) -> TaskListResponse:
         )
 
     except Exception:
-        logger.exception("failed to search tasks: keyword = %s", keyword)
+        logger.exception(
+            "Unexpected error while updating task: keyword = %s",
+            keyword,
+        )
         raise
 
     finally:
@@ -225,19 +263,13 @@ def update_task(task_id: int, title: str) -> TaskResponse:
         title: the new task title
 
     Returns:
-        dict: The update result and updated Task information.
+        TaskResponse: The update result and updated Task information.
     """
 
     db = SessionLocal()
     try:
         repository = TaskRepository(db)
         task = repository.update_task(task_id, title)
-
-        if task is None:
-            return TaskResponse(
-                success=False,
-                message=f"Task {task_id} was not found.",
-            )
 
         return TaskResponse(
             success=True,
@@ -248,12 +280,22 @@ def update_task(task_id: int, title: str) -> TaskResponse:
             ),
         )
 
+    except (TaskTitleEmptyError, TaskNotFoundError) as exc:
+        logger.warning(
+            "failed to update task: task_id = %s, error = %s ",
+            task_id,
+            exc,
+        )
+        return TaskResponse(
+            success=False,
+            message=str(exc),
+        )
+
     except Exception:
         db.rollback()
         logger.exception(
-            "failed to update task: task_id = %s, title = %s ",
+            "Unexpected error while updating task: task_id = %s",
             task_id,
-            title,
         )
         raise
 
