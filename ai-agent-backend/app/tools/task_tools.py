@@ -6,6 +6,8 @@ from app.repositories.task_repository import TaskRepository
 
 from app.database import SessionLocal
 
+from app.schemas.task_schema import TaskResponse, TaskItem, TaskListResponse
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -21,7 +23,7 @@ def get_current_datetime() -> str:
 
 
 @function_tool
-def create_task(title: str) -> dict:
+def create_task(title: str) -> TaskResponse:
     """
     Create a new task.
 
@@ -37,11 +39,14 @@ def create_task(title: str) -> dict:
         repository = TaskRepository(db)
         task = repository.create(title=title)
 
-        result = {
-            "id": task.id,
-            "title": task.title,
-            "create_at": task.created_at.isoformat(),
-        }
+        result = TaskResponse(
+            success=True,
+            message="Task created successfully.",
+            task=TaskItem(
+                id=task.id,
+                title=task.title,
+            ),
+        )
 
         logger.info("Task created successfully: %s", result)
         return result
@@ -56,7 +61,7 @@ def create_task(title: str) -> dict:
 
 
 @function_tool
-def get_tasks() -> list[dict]:
+def get_tasks() -> TaskListResponse:
     """
     Get all tasks.
 
@@ -69,14 +74,19 @@ def get_tasks() -> list[dict]:
         repository = TaskRepository(db)
         tasks = repository.get_tasks()
 
-        result = [
-            {
-                "id": task.id,
-                "title": task.title,
-            }
+        task_items = [
+            TaskItem(
+                id=task.id,
+                title=task.title,
+            )
             for task in tasks
         ]
-        logger.info("Tasks get successfully: %s", result)
+        result = TaskListResponse(
+            success=True,
+            message="Tasks retrieved successfully.",
+            tasks=task_items,
+        )
+        logger.info("Tasks retrieved successfully: %s", result)
         return result
 
     except Exception as e:
@@ -88,12 +98,12 @@ def get_tasks() -> list[dict]:
 
 
 @function_tool
-def get_task_by_id(task_id: int) -> dict:
+def get_task_by_id(task_id: int) -> TaskResponse:
     """
     Retrieve a task by ID.
 
     Args:
-        id (int): the task ID
+        task_id: the task ID
 
     Returns:
         dict: return information or a not-found result.
@@ -104,15 +114,19 @@ def get_task_by_id(task_id: int) -> dict:
         task = repository.get_task(task_id)
 
         if task is None:
-            return {"success": False, "message": f"Task {task_id} was not found."}
+            return TaskResponse(
+                success=False,
+                message=f"Task {task_id} was not found.",
+            )
 
-        return {
-            "success": True,
-            "task": {
-                "id": task.id,
-                "title": task.title,
-            },
-        }
+        return TaskResponse(
+            success=True,
+            message="Task retrieved successfully.",
+            task=TaskItem(
+                id=task.id,
+                title=task.title,
+            ),
+        )
 
     except Exception:
         logger.exception("failed to get task_id= %s", task_id)
@@ -123,7 +137,7 @@ def get_task_by_id(task_id: int) -> dict:
 
 
 @function_tool
-def delete_task(task_id: int) -> dict:
+def delete_task(task_id: int) -> TaskResponse:
     """delete a task by its ID.
 
     Args:
@@ -139,15 +153,15 @@ def delete_task(task_id: int) -> dict:
         deleted = repository.delete_task(task_id)
 
         if not deleted:
-            return {
-                "success": False,
-                "message": f"Task {task_id} was not found.",
-            }
+            return TaskResponse(
+                success=False,
+                message=f"Task {task_id} was not found.",
+            )
 
-        return {
-            "success": True,
-            "message": f"Task {task_id} was deleted.",
-        }
+        return TaskResponse(
+            success=True,
+            message=f"Task {task_id} was deleted.",
+        )
 
     except Exception:
         db.rollback()
@@ -159,7 +173,7 @@ def delete_task(task_id: int) -> dict:
 
 
 @function_tool
-def search_tasks(keyword: str) -> list[dict]:
+def search_tasks(keyword: str) -> TaskListResponse:
     """
     search tasks by title keyword.
 
@@ -174,19 +188,24 @@ def search_tasks(keyword: str) -> list[dict]:
         repository = TaskRepository(db)
         tasks = repository.search_tasks(keyword)
 
-        result = [
-            {
-                "id": task.id,
-                "title": task.title,
-            }
+        task_items = [
+            TaskItem(
+                id=task.id,
+                title=task.title,
+            )
             for task in tasks
         ]
+
         logger.info(
             "Tasks searched successfully: keyword = %s, count = %s",
             keyword,
             len(tasks),
         )
-        return result
+        return TaskListResponse(
+            success=True,
+            message="Task searched successfully.",
+            tasks=task_items,
+        )
 
     except Exception:
         logger.exception("failed to search tasks: keyword = %s", keyword)
@@ -197,13 +216,13 @@ def search_tasks(keyword: str) -> list[dict]:
 
 
 @function_tool
-def update_task(task_id: int, title: str) -> dict:
+def update_task(task_id: int, title: str) -> TaskResponse:
     """
     update task title by task ID.
 
     Args:
-        task_id (int): task ID
-        title (str): the new task title
+        task_id: task ID
+        title: the new task title
 
     Returns:
         dict: The update result and updated Task information.
@@ -215,18 +234,19 @@ def update_task(task_id: int, title: str) -> dict:
         task = repository.update_task(task_id, title)
 
         if task is None:
-            return {
-                "success": False,
-                "message": f"Task {task_id} was not found.",
-            }
+            return TaskResponse(
+                success=False,
+                message=f"Task {task_id} was not found.",
+            )
 
-        return {
-            "success": True,
-            "task": {
-                "id": task.id,
-                "title": task.title,
-            },
-        }
+        return TaskResponse(
+            success=True,
+            message="Task updated successfully.",
+            task=TaskItem(
+                id=task.id,
+                title=task.title,
+            ),
+        )
 
     except Exception:
         db.rollback()

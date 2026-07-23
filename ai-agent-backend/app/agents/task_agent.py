@@ -23,7 +23,7 @@ task_agent = Agent(
         "When the user asks to view a specific task, use the get_task_by_id tool. "
         "When the user asks to delete a task, use the delete_task tool. "
         "When the user asks to search tasks by keyword, use the search_tasks tool. "
-        "When the user asks to update task, use the update_task tool. "
+        "When the user asks to update or rename a task, use the update_task tool. "
         "If the user writes in Japanese, answer in Japanese. "
         "If the user writes in Chinese, answer in Chinese. "
     ),
