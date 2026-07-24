@@ -9,10 +9,12 @@ from app.exceptions.task_exceptions import (
     TaskTitleEmptyError,
     TaskAlreadyExistsError,
 )
+from app.memory.memory import ConversationMemory
 
 import logging
 
 logger = logging.getLogger(__name__)
+memory = ConversationMemory()
 
 
 @function_tool
@@ -54,10 +56,13 @@ def create_task(title: str) -> TaskResponse:
             "Task created successfully: %s",
             result,
         )
+
+        memory.current_task_id = task.id
+        memory.current_task_title = task.title
+
         return result
 
     except (TaskTitleEmptyError, TaskAlreadyExistsError) as exc:
-        db.rollback()
         logger.warning(
             "Task created failed: %s",
             exc,
@@ -135,6 +140,9 @@ def get_task_by_id(task_id: int) -> TaskResponse:
         repository = TaskRepository(db)
         task = repository.get_task(task_id)
 
+        memory.current_task_id = task.id
+        memory.current_task_title = task.title
+
         return TaskResponse(
             success=True,
             message="Task retrieved successfully.",
@@ -178,6 +186,9 @@ def delete_task(task_id: int) -> TaskResponse:
     try:
         repository = TaskRepository(db)
         repository.delete_task(task_id)
+
+        memory.current_task_id = None
+        memory.current_task_title = None
 
         return TaskResponse(
             success=True,
@@ -244,7 +255,7 @@ def search_tasks(keyword: str) -> TaskListResponse:
 
     except Exception:
         logger.exception(
-            "Unexpected error while updating task: keyword = %s",
+            "Unexpected error while searching task: keyword = %s",
             keyword,
         )
         raise
@@ -271,6 +282,9 @@ def update_task(task_id: int, title: str) -> TaskResponse:
         repository = TaskRepository(db)
         task = repository.update_task(task_id, title)
 
+        memory.current_task_id = task.id
+        memory.current_task_title = task.title
+
         return TaskResponse(
             success=True,
             message="Task updated successfully.",
@@ -295,6 +309,126 @@ def update_task(task_id: int, title: str) -> TaskResponse:
         db.rollback()
         logger.exception(
             "Unexpected error while updating task: task_id = %s",
+            task_id,
+        )
+        raise
+
+    finally:
+        db.close()
+
+
+@function_tool
+def delete_current_task() -> TaskResponse:
+    """
+    Delete the task currently stored in conversation memory.
+
+    Returns:
+        TaskResponse: The deletion result.
+    """
+    task_id = memory.current_task_id
+
+    if task_id is None:
+        return TaskResponse(
+            success=False, message="There is no current task in memory. "
+        )
+
+    db = SessionLocal()
+    try:
+        repository = TaskRepository(db)
+        repository.delete_task(task_id)
+
+        memory.current_task_id = None
+        memory.current_task_title = None
+
+        logger.info("Current task deleted successfully: task_id = %s", task_id)
+
+        return TaskResponse(success=True, message=f"Task {task_id} was deleted. ")
+
+    except TaskNotFoundError as exc:
+        memory.current_task_id = None
+        memory.current_task_title = None
+
+        logger.warning(
+            "Failed to delete current task: task_id=%s, error=%s",
+            task_id,
+            exc,
+        )
+
+        return TaskResponse(
+            success=False,
+            message=str(exc),
+        )
+
+    except Exception:
+        db.rollback()
+        logger.exception(
+            "Unexpected error while deleting current task: task_id=%s",
+            task_id,
+        )
+        raise
+
+    finally:
+        db.close()
+
+
+@function_tool
+def update_current_task(title: str) -> TaskResponse:
+    """
+    Update the title of the task currently stored in conversation memory.
+
+    Args:
+        title: The new task title.
+
+    Returns:
+        TaskResponse: The update result.
+    """
+    task_id = memory.current_task_id
+
+    if task_id is None:
+        return TaskResponse(
+            success=False, message="There is no current task in memory. "
+        )
+
+    db = SessionLocal()
+
+    try:
+        repository = TaskRepository(db)
+        task = repository.update_task(task_id=task_id, title=title)
+
+        memory.current_task_id = task_id
+        memory.current_task_title = title
+
+        logger.info(
+            "Current task updated successfully: task_id = %s, title = %s.",
+            task.id,
+            task.title,
+        )
+
+        return TaskResponse(
+            success=True,
+            message="Current task updated successfully. ",
+            task=TaskItem(
+                id=task.id,
+                title=task.title,
+            ),
+        )
+
+    except (TaskTitleEmptyError, TaskNotFoundError) as exc:
+        logger.warning(
+            "Failed to update current task: task_id=%s, error=%s",
+            task_id,
+            exc,
+        )
+
+        return TaskResponse(
+            success=False,
+            message=str(exc),
+        )
+
+    except Exception:
+        db.rollback()
+        logger.exception(
+            "Unexpected error while updating current task: task_id=%s",
             task_id,
         )
         raise

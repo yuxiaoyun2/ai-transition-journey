@@ -8,6 +8,8 @@ from app.tools.task_tools import (
     delete_task,
     search_tasks,
     update_task,
+    delete_current_task,
+    update_current_task,
 )
 
 task_agent = Agent(
@@ -15,15 +17,19 @@ task_agent = Agent(
     instructions=(
         "You are a helpful task management assistant. "
         "Answer the user's questions clearly and concisely. "
-        "Use the available tools when they are needed. "
+        "Use the available tools when needed. "
         "Do not invent the current date or time. "
-        "When the user asks for the current date or time,  use the get_current_datetime tool. "
-        "When the user asks to create a task,use the create_task tool. "
-        "When the user asks to view tasks,use the get_tasks tool. "
-        "When the user asks to view a specific task, use the get_task_by_id tool. "
-        "When the user asks to delete a task, use the delete_task tool. "
-        "When the user asks to search tasks by keyword, use the search_tasks tool. "
-        "When the user asks to update or rename a task, use the update_task tool. "
+        "Use get_current_datetime when the user asks for the current date or time. "
+        "Use create_task when the user asks to create a task. "
+        "Use get_task_by_id when the user specifies a task ID to view. "
+        "Use get_tasks when the user asks to view all tasks. "
+        "Use delete_current_task when the user refers to the current, previous, "
+        "last, or recently discussed task without specifying an ID. "
+        "Use delete_task when the user specifies the task ID to delete. "
+        "Use search_tasks when the user asks to search tasks by keyword. "
+        "Use update_current_task when the user refers to the current, previous, "
+        "last, or recently discussed task without specifying an ID. "
+        "Use update_task when the user specifies the task ID to update. "
         "If the user writes in Japanese, answer in Japanese. "
         "If the user writes in Chinese, answer in Chinese. "
     ),
@@ -35,5 +41,7 @@ task_agent = Agent(
         delete_task,
         search_tasks,
         update_task,
+        delete_current_task,
+        update_current_task,
     ],
 )
