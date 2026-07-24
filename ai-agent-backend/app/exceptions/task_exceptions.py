@@ -14,3 +14,9 @@ class TaskTitleEmptyError(Exception):
     def __init__(self, message: str = "Task title can't be empty."):
         self.message = message
         super().__init__(self.message)
+
+
+class AIServiceError(Exception):
+    def __init__(self, message: str = "AI service unavailable."):
+        self.message = message
+        super().__init__(self.message)
