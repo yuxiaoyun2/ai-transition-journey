@@ -1,5 +1,7 @@
 from agents import Agent
 
+from app.agents.agent_context import AgentContext
+
 from app.tools.task_tools import (
     get_current_datetime,
     create_task,
@@ -12,7 +14,7 @@ from app.tools.task_tools import (
     update_current_task,
 )
 
-task_agent = Agent(
+task_agent = Agent[AgentContext](
     name="Task Assistant",
     instructions=(
         "You are a helpful task management assistant. "

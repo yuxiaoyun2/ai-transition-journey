@@ -1,5 +1,5 @@
 from datetime import datetime
-from agents import function_tool
+from agents import function_tool, RunContextWrapper
 
 from app.repositories.task_repository import TaskRepository
 from app.database import SessionLocal
@@ -9,12 +9,12 @@ from app.exceptions.task_exceptions import (
     TaskTitleEmptyError,
     TaskAlreadyExistsError,
 )
-from app.memory.memory import ConversationMemory
+from app.memory.memory_store import memory_store
+from app.agents.agent_context import AgentContext
 
 import logging
 
 logger = logging.getLogger(__name__)
-memory = ConversationMemory()
 
 
 @function_tool
@@ -27,7 +27,10 @@ def get_current_datetime() -> str:
 
 
 @function_tool
-def create_task(title: str) -> TaskResponse:
+def create_task(
+    ctx: RunContextWrapper[AgentContext],
+    title: str,
+) -> TaskResponse:
     """
     Create a new task.
 
@@ -37,11 +40,19 @@ def create_task(title: str) -> TaskResponse:
     Returns:
         Created task information.
     """
+    memory = memory_store.get_memory(ctx.context.session_id)
+
     db = SessionLocal()
     logger.info("create_task tool was called: title=%s", title)
+
     try:
         repository = TaskRepository(db)
         task = repository.create(title=title)
+
+        memory.set_current_task(
+            task_id=task.id,
+            task_title=task.title,
+        )
 
         result = TaskResponse(
             success=True,
@@ -56,9 +67,6 @@ def create_task(title: str) -> TaskResponse:
             "Task created successfully: %s",
             result,
         )
-
-        memory.current_task_id = task.id
-        memory.current_task_title = task.title
 
         return result
 
@@ -125,7 +133,10 @@ def get_tasks() -> TaskListResponse:
 
 
 @function_tool
-def get_task_by_id(task_id: int) -> TaskResponse:
+def get_task_by_id(
+    ctx: RunContextWrapper[AgentContext],
+    task_id: int,
+) -> TaskResponse:
     """
     Retrieve a task by ID.
 
@@ -135,13 +146,17 @@ def get_task_by_id(task_id: int) -> TaskResponse:
     Returns:
         TaskResponse: The task information or a not-found result.
     """
+
+    memory = memory_store.get_memory(ctx.context.session_id)
     db = SessionLocal()
     try:
         repository = TaskRepository(db)
         task = repository.get_task(task_id)
 
-        memory.current_task_id = task.id
-        memory.current_task_title = task.title
+        memory.set_current_task(
+            task_id=task.id,
+            task_title=task.title,
+        )
 
         return TaskResponse(
             success=True,
@@ -173,7 +188,10 @@ def get_task_by_id(task_id: int) -> TaskResponse:
 
 
 @function_tool
-def delete_task(task_id: int) -> TaskResponse:
+def delete_task(
+    ctx: RunContextWrapper[AgentContext],
+    task_id: int,
+) -> TaskResponse:
     """delete a task by its ID.
 
     Args:
@@ -182,13 +200,15 @@ def delete_task(task_id: int) -> TaskResponse:
     Returns:
         The deletion result.
     """
+
+    memory = memory_store.get_memory(ctx.context.session_id)
+
     db = SessionLocal()
     try:
         repository = TaskRepository(db)
         repository.delete_task(task_id)
 
-        memory.current_task_id = None
-        memory.current_task_title = None
+        memory.clean_current_task()
 
         return TaskResponse(
             success=True,
@@ -197,7 +217,8 @@ def delete_task(task_id: int) -> TaskResponse:
 
     except TaskNotFoundError as exc:
         logger.warning(
-            "failed to delete task: task_id = %s",
+            "failed to delete task: session_id = %s, task_id = %s",
+            ctx.context.session_id,
             task_id,
         )
 
@@ -209,7 +230,8 @@ def delete_task(task_id: int) -> TaskResponse:
     except Exception:
         db.rollback()
         logger.exception(
-            "Unexpected error while deleting task: task_id = %s",
+            "Unexpected error while deleting task: session_id = %s, task_id = %s",
+            ctx.context.session_id,
             task_id,
         )
         raise
@@ -265,7 +287,11 @@ def search_tasks(keyword: str) -> TaskListResponse:
 
 
 @function_tool
-def update_task(task_id: int, title: str) -> TaskResponse:
+def update_task(
+    ctx: RunContextWrapper[AgentContext],
+    task_id: int,
+    title: str,
+) -> TaskResponse:
     """
     update task title by task ID.
 
@@ -277,13 +303,14 @@ def update_task(task_id: int, title: str) -> TaskResponse:
         TaskResponse: The update result and updated Task information.
     """
 
+    memory = memory_store.get_memory(ctx.context.session_id)
+
     db = SessionLocal()
     try:
         repository = TaskRepository(db)
         task = repository.update_task(task_id, title)
 
-        memory.current_task_id = task.id
-        memory.current_task_title = task.title
+        memory.set_current_task(task_id=task.id, task_title=task.title)
 
         return TaskResponse(
             success=True,
@@ -296,7 +323,8 @@ def update_task(task_id: int, title: str) -> TaskResponse:
 
     except (TaskTitleEmptyError, TaskNotFoundError) as exc:
         logger.warning(
-            "failed to update task: task_id = %s, error = %s ",
+            "failed to update task: session_id = %s, task_id = %s, error = %s ",
+            ctx.context.session_id,
             task_id,
             exc,
         )
@@ -308,7 +336,8 @@ def update_task(task_id: int, title: str) -> TaskResponse:
     except Exception:
         db.rollback()
         logger.exception(
-            "Unexpected error while updating task: task_id = %s",
+            "Unexpected error while updating task: session_id = %s, task_id = %s",
+            ctx.context.session_id,
             task_id,
         )
         raise
@@ -318,13 +347,15 @@ def update_task(task_id: int, title: str) -> TaskResponse:
 
 
 @function_tool
-def delete_current_task() -> TaskResponse:
+def delete_current_task(ctx: RunContextWrapper[AgentContext]) -> TaskResponse:
     """
     Delete the task currently stored in conversation memory.
 
     Returns:
         TaskResponse: The deletion result.
     """
+    memory = memory_store.get_memory(ctx.context.session_id)
+
     task_id = memory.current_task_id
 
     if task_id is None:
@@ -337,19 +368,18 @@ def delete_current_task() -> TaskResponse:
         repository = TaskRepository(db)
         repository.delete_task(task_id)
 
-        memory.current_task_id = None
-        memory.current_task_title = None
+        memory.clean_current_task()
 
         logger.info("Current task deleted successfully: task_id = %s", task_id)
 
         return TaskResponse(success=True, message=f"Task {task_id} was deleted. ")
 
     except TaskNotFoundError as exc:
-        memory.current_task_id = None
-        memory.current_task_title = None
+        memory.clean_current_task()
 
         logger.warning(
-            "Failed to delete current task: task_id=%s, error=%s",
+            "Failed to delete current task: session_id=%s, task_id=%s, error=%s",
+            ctx.context.session_id,
             task_id,
             exc,
         )
@@ -362,7 +392,8 @@ def delete_current_task() -> TaskResponse:
     except Exception:
         db.rollback()
         logger.exception(
-            "Unexpected error while deleting current task: task_id=%s",
+            "Unexpected error while deleting current task: session_id=%s, task_id=%s",
+            ctx.context.session_id,
             task_id,
         )
         raise
@@ -372,7 +403,10 @@ def delete_current_task() -> TaskResponse:
 
 
 @function_tool
-def update_current_task(title: str) -> TaskResponse:
+def update_current_task(
+    ctx: RunContextWrapper[AgentContext],
+    title: str,
+) -> TaskResponse:
     """
     Update the title of the task currently stored in conversation memory.
 
@@ -382,6 +416,9 @@ def update_current_task(title: str) -> TaskResponse:
     Returns:
         TaskResponse: The update result.
     """
+
+    memory = memory_store.get_memory(ctx.context.session_id)
+
     task_id = memory.current_task_id
 
     if task_id is None:
@@ -395,11 +432,10 @@ def update_current_task(title: str) -> TaskResponse:
         repository = TaskRepository(db)
         task = repository.update_task(task_id=task_id, title=title)
 
-        memory.current_task_id = task_id
-        memory.current_task_title = title
+        memory.set_current_task(task_id=task.id, task_title=task.title)
 
         logger.info(
-            "Current task updated successfully: task_id = %s, title = %s.",
+            "Current task updated successfully: task_id=%s, title = %s.",
             task.id,
             task.title,
         )
@@ -415,7 +451,8 @@ def update_current_task(title: str) -> TaskResponse:
 
     except (TaskTitleEmptyError, TaskNotFoundError) as exc:
         logger.warning(
-            "Failed to update current task: task_id=%s, error=%s",
+            "Failed to update current task: session_id=%s, task_id=%s, error=%s",
+            ctx.context.session_id,
             task_id,
             exc,
         )
@@ -428,7 +465,8 @@ def update_current_task(title: str) -> TaskResponse:
     except Exception:
         db.rollback()
         logger.exception(
-            "Unexpected error while updating current task: task_id=%s",
+            "Unexpected error while updating current task: session_id=%s, task_id=%s",
+            ctx.context.session_id,
             task_id,
         )
         raise
