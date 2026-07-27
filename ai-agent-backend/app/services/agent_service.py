@@ -1,7 +1,5 @@
 from agents import Runner
 
-from fastapi.responses import StreamingResponse
-
 from app.agents.task_agent import task_agent
 from app.exceptions.task_exceptions import AIServiceError
 from app.agents.agent_context import AgentContext
@@ -18,7 +16,7 @@ class AgentService:
             context = AgentContext(
                 session_id=session_id,
             )
-            result = await Runner.run_streamed(
+            result = await Runner.run(
                 starting_agent=task_agent, input=message, context=context
             )
 
