@@ -25,11 +25,9 @@ async def chat_with_agent(
     request: AgentChatRequest,
     service: AgentService = Depends(get_agent_service),
 ) -> AgentChatResponse:
-    answer = await service.chat(
+    result = await service.chat(
         session_id=request.session_id,
         message=request.message,
     )
 
-    return AgentChatResponse(
-        answer=answer,
-    )
+    return AgentChatResponse(answer=result.answer, source=result.source)

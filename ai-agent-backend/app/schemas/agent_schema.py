@@ -13,3 +13,9 @@ class AgentChatRequest(BaseModel):
 
 class AgentChatResponse(BaseModel):
     answer: str
+    source: str
+
+
+class SearchResult(BaseModel):
+    answer: str
+    source: str

@@ -1,6 +1,7 @@
 from agents import Agent
 
 from app.agents.agent_context import AgentContext
+from app.schemas.agent_schema import SearchResult
 
 from app.tools.task_tools import (
     get_current_datetime,
@@ -49,4 +50,5 @@ task_agent = Agent[AgentContext](
         update_current_task,
         search_document,
     ],
+    output_type=SearchResult,
 )
