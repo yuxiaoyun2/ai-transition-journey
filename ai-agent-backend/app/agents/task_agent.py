@@ -12,6 +12,7 @@ from app.tools.task_tools import (
     update_task,
     delete_current_task,
     update_current_task,
+    search_document,
 )
 
 task_agent = Agent[AgentContext](
@@ -32,6 +33,7 @@ task_agent = Agent[AgentContext](
         "Use update_current_task when the user refers to the current, previous, "
         "last, or recently discussed task without specifying an ID. "
         "Use update_task when the user specifies the task ID to update. "
+        "Use search_document when the user asks about knowledge stored in the internal document repository."
         "If the user writes in Japanese, answer in Japanese. "
         "If the user writes in Chinese, answer in Chinese. "
     ),
@@ -45,5 +47,6 @@ task_agent = Agent[AgentContext](
         update_task,
         delete_current_task,
         update_current_task,
+        search_document,
     ],
 )

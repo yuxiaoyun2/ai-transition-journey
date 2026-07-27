@@ -11,6 +11,7 @@ from app.exceptions.task_exceptions import (
 )
 from app.memory.memory_store import memory_store
 from app.agents.agent_context import AgentContext
+from app.services.document_service import DocumentService
 
 import logging
 
@@ -473,3 +474,19 @@ def update_current_task(
 
     finally:
         db.close()
+
+
+@function_tool
+def search_document(
+    keyword: str,
+) -> str:
+    """
+    Search relevant documents using a keyword.
+
+    Use this tool when the user asks questions
+    that may require external knowledge.
+    """
+
+    service = DocumentService()
+
+    return service.search_document(keyword=keyword)
