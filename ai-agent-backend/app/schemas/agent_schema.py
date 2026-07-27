@@ -17,5 +17,7 @@ class AgentChatResponse(BaseModel):
 
 
 class SearchResult(BaseModel):
-    answer: str
-    source: str
+    answer: str = Field(description="The final response to the user.")
+    source: str = Field(
+        description="The document name or tool name used to generate the answer."
+    )
