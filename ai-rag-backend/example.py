@@ -1,11 +1,25 @@
 import chromadb
+from openai import OpenAI
 
-client = chromadb.Client()
+client = OpenAI()
 
-collection = client.create_collection("documents")
+embedding = (
+    client.embeddings.create(
+        model="text-embedding -3-small", input="Python is a programming language."
+    )
+    .data[0]
+    .embedding
+)
 
-collection.add(ids=["1"], documents=["Python is a programming language."])
+db = chromadb.PersistentClient(path="./chroma_db")
 
-result = collection.query(query_texts=["What is Python?"], n_results=1)
+collection = db.get_or_create_collection("documents")
 
-print(result)
+collection.add(
+    ids=["1"],
+    embeddings=[embedding],
+    documents=["Python is a programming language."],
+    metadatas=[{"source": "sample"}],
+)
+
+print("Saved.")
