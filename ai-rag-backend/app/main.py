@@ -1,7 +1,7 @@
 from app.core.openai_init import init_openai
 
 from fastapi import FastAPI
-
+from app.models.document_model import Document
 from app.database import Base, engine
 from app.routers.pdf import router as rag_router
 

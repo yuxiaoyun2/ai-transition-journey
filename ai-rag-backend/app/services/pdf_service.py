@@ -7,6 +7,8 @@ import shutil
 
 from app.services.embedding_service import EmbeddingService
 from app.repositories.chroma_repository import ChromaRepository
+from app.repositories.document_repository import DocumentRepository
+from app.models.document_model import Document
 
 UPLOAD_DIR = "uploads"
 
@@ -16,10 +18,12 @@ class PDFService:
     def __init__(
         self,
         embedding_service: EmbeddingService,
-        repository: ChromaRepository,
+        chroma_repository: ChromaRepository,
+        document_repository: DocumentRepository,
     ):
         self.embedding_service = embedding_service
-        self.chromadb = repository
+        self.chroma_repository = chroma_repository
+        self.document_repository = document_repository
 
     def upload_pdf(
         self,
@@ -29,35 +33,58 @@ class PDFService:
         if not os.path.exists(UPLOAD_DIR):
             os.makedirs(UPLOAD_DIR)
 
+        filename = file.filename or "unknown.pdf"
+        filepath = os.path.join(UPLOAD_DIR, file.filename)
+
+        self.save_file(
+            file=file,
+            filepath=filepath,
+        )
+
+        file.file.seek(0)
+
         text = self.pdf_to_text(file)
 
         if not text.strip():
             raise ValueError("PDFからテキストを抽出できませんでした。")
 
+        document = Document(title=title, filename=filename, filepath=filepath)
+
+        document = self.document_repository.create(document)
+
         chunks = self.split_text(text)
 
         embeddings = self.embedding_service.embedding_create(chunks)
 
-        document_id = str(uuid4())
-
         ids = self.get_ids(
-            document_id=document_id,
+            document_id=document.id,
             chunk_count=len(chunks),
         )
 
         metadatas = self.get_metadatas(
-            document_id=document_id,
+            document_id=document.id,
             title=title,
             filename=file.filename or "unknown.pdf",
             chunk_count=len(chunks),
         )
 
-        return self.chromadb.insert(
+        return self.chroma_repository.insert(
             ids=ids,
             embeddings=embeddings,
             chunks=chunks,
             metadatas=metadatas,
         )
+
+    def save_file(
+        self,
+        file: UploadFile,
+        filepath: str,
+    ) -> None:
+        with open(filepath, "wb") as buffer:
+            shutil.copyfileobj(
+                file.file,
+                buffer,
+            )
 
     def pdf_to_text(
         self,
