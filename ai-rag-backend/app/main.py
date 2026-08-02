@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from app.models.document_model import Document
 from app.database import Base, engine
 from app.routers.pdf import router as rag_router
+from app.routers.search import router as search_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -19,6 +20,12 @@ app.include_router(
     rag_router,
     prefix="/pdf",
     tags=["PDF"],
+)
+
+app.include_router(
+    search_router,
+    prefix="/search",
+    tags=["Search"],
 )
 
 

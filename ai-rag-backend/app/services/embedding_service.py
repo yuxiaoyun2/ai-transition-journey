@@ -6,20 +6,24 @@ class EmbeddingService:
     def __init__(self):
         self.client = OpenAI()
 
-    def embedding_create(
+    def embeddings_create(
         self,
-        chunks: list[str],
+        texts: list[str],
     ) -> list[list[float]]:
         embeddings = []
 
-        for chunk in chunks:
-            embedding = (
-                self.client.embeddings.create(
-                    model="text-embedding-3-small", input=chunk
-                )
-                .data[0]
-                .embedding
-            )
-            embeddings.append(embedding)
+        for text in texts:
+            embeddings.append(self.embedding_create(text))
 
         return embeddings
+
+    def embedding_create(
+        self,
+        text: str,
+    ) -> list[float]:
+        response = self.client.embeddings.create(
+            model="text-embedding-3-small",
+            input=text,
+        )
+
+        return response.data[0].embedding

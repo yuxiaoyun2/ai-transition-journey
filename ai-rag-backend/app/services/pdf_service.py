@@ -30,12 +30,12 @@ class PDFService:
         self,
         title: str,
         file: UploadFile,
-    ) -> bool:
+    ) -> UploadResponse:
         if not os.path.exists(UPLOAD_DIR):
             os.makedirs(UPLOAD_DIR)
 
         filename = file.filename or "unknown.pdf"
-        filepath = os.path.join(UPLOAD_DIR, file.filename)
+        filepath = os.path.join(UPLOAD_DIR, filename)
 
         self.save_file(
             file=file,
@@ -44,39 +44,48 @@ class PDFService:
 
         file.file.seek(0)
 
-        text = self.pdf_to_text(file)
-
-        if not text.strip():
-            raise ValueError("PDFからテキストを抽出できませんでした。")
+        pages = self.pdf_to_pages(file)
 
         document = Document(title=title, filename=filename, filepath=filepath)
 
         document = self.document_repository.create(document)
 
-        chunks = self.split_text(text)
+        chunks = []
+        metadatas = []
 
-        embeddings = self.embedding_service.embedding_create(chunks)
+        for page in pages:
+            page_chunks = self.split_text(page["text"])
+
+            for chunk_index, chunk in enumerate(page_chunks):
+                chunks.append(chunk)
+
+                metadatas.append(
+                    {
+                        "document_id": document.id,
+                        "filename": filename,
+                        "page_number": page["page_number"],
+                        "chunk_index": chunk_index,
+                    }
+                )
+
+        if not chunks:
+            raise ValueError("Chunkを生成できませんでした。")
+
+        embeddings = self.embedding_service.embeddings_create(chunks)
 
         ids = self.get_ids(
             document_id=document.id,
             chunk_count=len(chunks),
         )
 
-        metadatas = self.get_metadatas(
-            document_id=document.id,
-            title=title,
-            filename=file.filename or "unknown.pdf",
-            chunk_count=len(chunks),
-        )
-
-        chroma = self.chroma_repository.insert(
+        success = self.chroma_repository.insert(
             ids=ids,
             embeddings=embeddings,
             chunks=chunks,
             metadatas=metadatas,
         )
 
-        return UploadResponse(success=chroma, message="Upload completed.")
+        return UploadResponse(success=success, message="Upload completed.")
 
     def save_file(
         self,
@@ -89,21 +98,29 @@ class PDFService:
                 buffer,
             )
 
-    def pdf_to_text(
+    def pdf_to_pages(
         self,
         file: UploadFile,
-    ) -> str:
+    ) -> list[dict]:
         reader = pypdf.PdfReader(file.file)
 
-        texts = []
+        pages = []
 
-        for page in reader.pages:
-            page_text = page.extract_text()
+        for page_number, page in enumerate(
+            reader.pages,
+            start=1,
+        ):
+            text = page.extract_text() or ""
 
-            if page_text:
-                texts.append(page_text)
+            if text.strip():
+                pages.append(
+                    {
+                        "page_number": page_number,
+                        "text": text,
+                    }
+                )
 
-        return "\n".join(texts)
+        return pages
 
     def split_text(
         self,
