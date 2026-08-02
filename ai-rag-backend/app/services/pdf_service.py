@@ -9,6 +9,7 @@ from app.services.embedding_service import EmbeddingService
 from app.repositories.chroma_repository import ChromaRepository
 from app.repositories.document_repository import DocumentRepository
 from app.models.document_model import Document
+from app.schemas.pdf_schema import UploadResponse
 
 UPLOAD_DIR = "uploads"
 
@@ -68,12 +69,14 @@ class PDFService:
             chunk_count=len(chunks),
         )
 
-        return self.chroma_repository.insert(
+        chroma = self.chroma_repository.insert(
             ids=ids,
             embeddings=embeddings,
             chunks=chunks,
             metadatas=metadatas,
         )
+
+        return UploadResponse(success=chroma, message="Upload completed.")
 
     def save_file(
         self,

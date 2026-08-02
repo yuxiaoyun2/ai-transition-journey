@@ -20,6 +20,6 @@ class EmbeddingService:
                 .data[0]
                 .embedding
             )
-            self.embedding.append(embedding)
+            embeddings.append(embedding)
 
         return embeddings

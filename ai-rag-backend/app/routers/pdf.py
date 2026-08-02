@@ -4,6 +4,7 @@ from app.services.pdf_service import PDFService
 from app.repositories.chroma_repository import ChromaRepository
 from app.services.embedding_service import EmbeddingService
 from app.repositories.document_repository import DocumentRepository
+from app.schemas.pdf_schema import UploadResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
 
@@ -22,7 +23,7 @@ def get_pdf_service(db: Session = Depends(get_db)) -> PDFService:
     )
 
 
-@router.post("/upload")
+@router.post("/upload", response_model=UploadResponse)
 def upload_pdf(
     title: str,
     file: UploadFile = File(...),
