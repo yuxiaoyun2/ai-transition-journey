@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 
-from app.services.pdf_service import PDFService
 from app.services.retrieval_service import RetrievalService
 from app.repositories.chroma_repository import ChromaRepository
 from app.services.embedding_service import EmbeddingService

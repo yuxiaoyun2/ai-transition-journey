@@ -25,16 +25,6 @@ def get_pdf_service(db: Session = Depends(get_db)) -> PDFService:
     )
 
 
-def get_retrieval_service() -> RetrievalService:
-    embedding_service = EmbeddingService()
-    chroma_repository = ChromaRepository()
-
-    return PDFService(
-        embedding_service,
-        chroma_repository,
-    )
-
-
 @router.post("/upload", response_model=UploadResponse)
 def upload_pdf(
     title: str,
@@ -44,15 +34,4 @@ def upload_pdf(
     return service.upload_pdf(
         title,
         file,
-    )
-
-
-@router.post("", response_model=SearchResponse)
-def search_documents(
-    request: SearchRequest,
-    service: RetrievalService = Depends(get_retrieval_service),
-):
-    return service.search(
-        question=request.question,
-        top_k=request.top_k,
     )

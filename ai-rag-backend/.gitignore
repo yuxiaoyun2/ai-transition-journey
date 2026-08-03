@@ -4,6 +4,6 @@ __pycache__/
 .pytest_cache/
 .env
 .DS_Store
-.uploads/
-.rag.db
-.chroma_db/
+uploads/
+rag.db
+chroma_db/
