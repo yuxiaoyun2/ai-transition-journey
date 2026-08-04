@@ -1,5 +1,4 @@
 from fastapi import UploadFile
-from uuid import uuid4
 
 import pypdf
 import os

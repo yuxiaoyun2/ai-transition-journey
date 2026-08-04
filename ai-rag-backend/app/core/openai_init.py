@@ -1,10 +1,15 @@
-import os
+from functools import lru_cache
+
+from openai import OpenAI
 
 from app.core.config import get_settings
 
 
-def init_openai():
+@lru_cache
+def get_openai_client() -> OpenAI:
 
     settings = get_settings()
 
-    os.environ["OPENAI_API_KEY"] = settings.openai_api_key
+    return OpenAI(
+        api_key=settings.openai_api_key,
+    )
