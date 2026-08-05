@@ -1,9 +1,11 @@
 from app.services.ai_service import AIService
 from app.services.retrieval_service import RetrievalService
-from app.schemas.search_schema import SearchResponse
+from app.schemas.search_schema import SearchItem
 from app.schemas.chat_schema import ChatResponse
 
 from textwrap import dedent
+
+THRESHOLD = 0.9
 
 
 class ChatService:
@@ -15,11 +17,8 @@ class ChatService:
         self.ai_service = ai_service
         self.retrieval_service = retrieval_service
 
-    def chat(
-        self,
-        question: str,
-    ) -> ChatResponse:
-        search_response = self.retrieval_service.search(question=question)
+    def chat(self, question: str, top_k: int) -> ChatResponse:
+        search_response = self.retrieval_service.search(question=question, top_k=top_k)
 
         if not search_response.results:
             return ChatResponse(
@@ -27,40 +26,31 @@ class ChatService:
                 sources=[],
             )
 
-        context = self.get_context(search_response)
+        results = [
+            item for item in search_response.results if item.distance <= THRESHOLD
+        ]
 
-        prompt = self.build_prompt(question=question, context=context)
+        prompt = self.build_prompt(question=question, results=results)
 
         answer = self.ai_service.generate_chat(prompt=prompt)
 
-        sources = self.get_sources(search_response)
+        sources = self.get_sources(results)
 
         return ChatResponse(
             answer=answer,
             sources=sources,
         )
 
-    def get_context(
-        self,
-        search_response: SearchResponse,
-    ) -> str:
-        return "\n\n".join(chunk.content for chunk in search_response.results)
-
     def get_sources(
         self,
-        search_response: SearchResponse,
+        results: list[SearchItem],
     ) -> list[str]:
         sources = []
 
-        for item in search_response.results:
-            metadata = item.metadata
+        for item in results:
+            title = item.metadata.title
 
-            title = metadata.get(
-                "title",
-                "Unknown document",
-            )
-
-            page_number = metadata.get("page_number")
+            page_number = item.metadata.page_number
 
             if page_number is not None:
                 source = f"{title} Page {page_number}"
@@ -74,21 +64,45 @@ class ChatService:
     def build_prompt(
         self,
         question: str,
-        context: str,
+        results: list[SearchItem],
     ) -> str:
+        contexts = []
+        for item in results:
+            contexts.append(
+                dedent(
+                    f"""
+                    Document:
+                    {item.metadata.title}
+            
+                    Page:
+                    {item.metadata.page_number}
+            
+                    Content:
+                    {item.content}
+                    """
+                ).strip()
+            )
+
+        context = "\n\n=============\n\n".join(contexts)
+
         return dedent(
             f"""
 
             あなたは文書検索AIです。
 
             以下のContextのみを根拠として回答してください。
-            Contextに回答がない場合は、推測せず、
-            「文書内には関連する情報が見つかりませんでした。」
-            と回答してください。
 
+            Context以外の知識は使用しないでください。
+
+            Contextに回答が存在しない場合は、
+
+            「文書内には関連する情報が見つかりませんでした。」
+
+            と回答してください。
+            
             Context:
             {context}
-
+            
             Question:
             {question}
             """

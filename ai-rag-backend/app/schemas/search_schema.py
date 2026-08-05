@@ -13,10 +13,18 @@ class SearchRequest(BaseModel):
     )
 
 
+class ChunkMetadata(BaseModel):
+    document_id: int
+    title: str
+    filename: str
+    page_number: int
+    chunk_index: int
+
+
 class SearchItem(BaseModel):
     chunk_id: str
     content: str
-    metadata: dict
+    metadata: ChunkMetadata
     distance: float
 
 

@@ -40,6 +40,4 @@ def chat(
     request: ChatRequest,
     service: ChatService = Depends(get_chat_service),
 ):
-    return service.chat(
-        question=request.question,
-    )
+    return service.chat(question=request.question, top_k=request.top_k)

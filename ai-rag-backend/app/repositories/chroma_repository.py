@@ -29,13 +29,19 @@ class ChromaRepository:
         self,
         query_embedding: list[float],
         top_k: int = 3,
+        document_id: int | None = None,
     ) -> dict:
-        return self.collection.query(
-            query_embeddings=[query_embedding],
-            n_results=top_k,
-            include=[
+        kwargs = {
+            "query_embeddings": [query_embedding],
+            "n_results": top_k,
+            "include": [
                 "documents",
                 "metadatas",
                 "distances",
             ],
-        )
+        }
+
+        if document_id is not None:
+            kwargs["where"] = {"document_id": document_id}
+
+        return self.collection.query(**kwargs)

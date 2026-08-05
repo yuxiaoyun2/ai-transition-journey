@@ -1,6 +1,6 @@
 from app.repositories.chroma_repository import ChromaRepository
 
-from app.schemas.search_schema import SearchItem, SearchResponse
+from app.schemas.search_schema import SearchItem, SearchResponse, ChunkMetadata
 
 from app.services.embedding_service import (
     EmbeddingService,
@@ -54,7 +54,7 @@ class RetrievalService:
         for (
             chunk_id,
             content,
-            metadata,
+            raw_metadata,
             distance,
         ) in zip(
             ids,
@@ -62,16 +62,21 @@ class RetrievalService:
             metadatas,
             distances,
         ):
+            if raw_metadata is None:
+                raise ValueError("Metadataが存在しません。")
+
+            metadata = ChunkMetadata(**raw_metadata)
+
             items.append(
                 SearchItem(
                     chunk_id=chunk_id,
                     content=content,
-                    metadata=metadata or {},
+                    metadata=metadata,
                     distance=distance,
                 )
             )
 
-            return SearchResponse(
-                question=question,
-                results=items,
-            )
+        return SearchResponse(
+            question=question,
+            results=items,
+        )

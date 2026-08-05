@@ -9,6 +9,7 @@ from app.repositories.chroma_repository import ChromaRepository
 from app.repositories.document_repository import DocumentRepository
 from app.models.document_model import Document
 from app.schemas.pdf_schema import UploadResponse
+from app.schemas.search_schema import ChunkMetadata
 
 UPLOAD_DIR = "uploads"
 
@@ -58,14 +59,15 @@ class PDFService:
             for chunk_index, chunk in enumerate(page_chunks):
                 chunks.append(chunk)
 
-                metadatas.append(
-                    {
-                        "document_id": document.id,
-                        "filename": filename,
-                        "page_number": page["page_number"],
-                        "chunk_index": chunk_index,
-                    }
+                metadata = ChunkMetadata(
+                    document_id=document.id,
+                    title=title,
+                    filename=filename,
+                    page_number=page["page_number"],
+                    chunk_index=chunk_index,
                 )
+
+                metadatas.append(metadata.model_dump())
 
         if not chunks:
             raise ValueError("Chunkを生成できませんでした。")
@@ -76,6 +78,10 @@ class PDFService:
             document_id=document.id,
             chunk_count=len(chunks),
         )
+
+        print("pages count:", len(pages))
+        print("chunks count:", len(chunks))
+        print("ids:", ids)
 
         success = self.chroma_repository.insert(
             ids=ids,
@@ -128,7 +134,7 @@ class PDFService:
         overlap: int = 100,
     ) -> list[str]:
 
-        if overlap > chunk_size:
+        if overlap >= chunk_size:
             raise ValueError("overlapはchunk_sizeより小さくしてください。")
 
         chunks = []
@@ -151,20 +157,3 @@ class PDFService:
         chunk_count: int,
     ) -> list[str]:
         return [f"{document_id}_{i}" for i in range(chunk_count)]
-
-    def get_metadatas(
-        self,
-        document_id: str,
-        title: str,
-        filename: str,
-        chunk_count: int,
-    ) -> list[dict]:
-        return [
-            {
-                "document_id": document_id,
-                "title": title,
-                "filename": filename,
-                "chunk_index": i,
-            }
-            for i in range(chunk_count)
-        ]
