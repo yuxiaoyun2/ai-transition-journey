@@ -29,4 +29,5 @@ def search_documents(
     return service.search(
         question=request.question,
         top_k=request.top_k,
+        document_id=request.document_id,
     )

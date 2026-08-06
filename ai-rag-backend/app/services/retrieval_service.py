@@ -24,6 +24,7 @@ class RetrievalService:
         self,
         question: str,
         top_k: int | None = None,
+        document_id: int | None = None,
     ) -> SearchResponse:
 
         if top_k is None:
@@ -35,8 +36,7 @@ class RetrievalService:
         query_embedding = self.embedding_service.embedding_create(question)
 
         result = self.chroma_repository.search(
-            query_embedding=query_embedding,
-            top_k=top_k,
+            query_embedding=query_embedding, top_k=top_k, document_id=document_id
         )
 
         ids = result.get(
@@ -59,7 +59,7 @@ class RetrievalService:
             [[]],
         )[0]
 
-        items = []
+        items: list[SearchItem] = []
 
         for (
             chunk_id,

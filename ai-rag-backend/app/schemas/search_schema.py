@@ -12,6 +12,11 @@ class SearchRequest(BaseModel):
         le=10,
     )
 
+    document_id = Field(
+        default=None,
+        ge=1,
+    )
+
 
 class ChunkMetadata(BaseModel):
     document_id: int
