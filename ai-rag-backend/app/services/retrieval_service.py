@@ -2,6 +2,8 @@ from app.repositories.chroma_repository import ChromaRepository
 
 from app.schemas.search_schema import SearchItem, SearchResponse, ChunkMetadata
 
+from app.core.config import get_settings
+
 from app.services.embedding_service import (
     EmbeddingService,
 )
@@ -16,12 +18,20 @@ class RetrievalService:
     ):
         self.embedding_service = embedding_service
         self.chroma_repository = chroma_repository
+        self.settings = get_settings()
 
     def search(
         self,
         question: str,
-        top_k: int = 3,
+        top_k: int | None = None,
     ) -> SearchResponse:
+
+        if top_k is None:
+            top_k = self.settings.retrieval_top_k
+
+        if top_k <= 0:
+            raise ValueError("top_kは1以上である必要があります。")
+
         query_embedding = self.embedding_service.embedding_create(question)
 
         result = self.chroma_repository.search(
@@ -67,14 +77,15 @@ class RetrievalService:
 
             metadata = ChunkMetadata(**raw_metadata)
 
-            items.append(
-                SearchItem(
-                    chunk_id=chunk_id,
-                    content=content,
-                    metadata=metadata,
-                    distance=distance,
-                )
+            item = SearchItem(
+                chunk_id=chunk_id,
+                content=content,
+                metadata=metadata,
+                distance=distance,
             )
+
+            if item.distance <= self.settings.retrieval_threshold:
+                items.append(item)
 
         return SearchResponse(
             question=question,

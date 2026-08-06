@@ -5,8 +5,6 @@ from app.schemas.chat_schema import ChatResponse
 
 from textwrap import dedent
 
-THRESHOLD = 0.9
-
 
 class ChatService:
     def __init__(
@@ -26,15 +24,11 @@ class ChatService:
                 sources=[],
             )
 
-        results = [
-            item for item in search_response.results if item.distance <= THRESHOLD
-        ]
-
-        prompt = self.build_prompt(question=question, results=results)
+        prompt = self.build_prompt(question=question, results=search_response.results)
 
         answer = self.ai_service.generate_chat(prompt=prompt)
 
-        sources = self.get_sources(results)
+        sources = self.get_sources(search_response.results)
 
         return ChatResponse(
             answer=answer,
