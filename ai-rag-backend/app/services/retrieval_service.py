@@ -36,7 +36,13 @@ class RetrievalService:
         query_embedding = self.embedding_service.embedding_create(question)
 
         result = self.chroma_repository.search(
-            query_embedding=query_embedding, top_k=top_k, document_id=document_id
+            query_embedding=query_embedding,
+            top_k=top_k,  # Top-K Retrieval
+            document_id=document_id,  # Metadata Filtering
+        )
+
+        print(
+            f"=========={result}==========",
         )
 
         ids = result.get(
@@ -84,8 +90,13 @@ class RetrievalService:
                 distance=distance,
             )
 
+            # Distance Threshold
             if item.distance <= self.settings.retrieval_threshold:
                 items.append(item)
+
+        print(
+            f"=========={items}==========",
+        )
 
         return SearchResponse(
             question=question,

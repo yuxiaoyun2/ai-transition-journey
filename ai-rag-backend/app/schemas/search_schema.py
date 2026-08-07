@@ -12,7 +12,7 @@ class SearchRequest(BaseModel):
         le=10,
     )
 
-    document_id = Field(
+    document_id: int = Field(
         default=None,
         ge=1,
     )

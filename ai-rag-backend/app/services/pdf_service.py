@@ -57,6 +57,8 @@ class PDFService:
             page_chunks = self.split_text(page["text"])
 
             for chunk_index, chunk in enumerate(page_chunks):
+                print(f"===== Chunk {chunk_index} =====")
+                print(chunk)
                 chunks.append(chunk)
 
                 metadata = ChunkMetadata(
