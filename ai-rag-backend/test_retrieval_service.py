@@ -1,0 +1,59 @@
+from unittest.mock import MagicMock
+
+from app.services.retrieval_service import RetrievalService
+from app.schemas.search_schema import SearchItem, SearchResponse, ChunkMetadata
+
+
+def test_retrieval_service():
+    embedding_service = MagicMock()
+
+    chroma_repository = MagicMock()
+
+    retrieval_service = RetrievalService(
+        embedding_service=embedding_service,
+        chroma_repository=chroma_repository,
+    )
+
+    question = "search test question"
+    query_embedding = [0.5, 0.7, 0.9]
+    top_k = 3
+    document_id = 1
+
+    embedding_service.embedding_create.return_value = query_embedding
+
+    chroma_repository.search.return_value = {
+        "ids": [["1_0"]],
+        "documents": [["search response with mock"]],
+        "metadatas": [
+            [
+                {
+                    "document_id": 1,
+                    "title": "test title",
+                    "filename": "test filename",
+                    "page_number": 1,
+                    "chunk_index": 0,
+                }
+            ]
+        ],
+        "distances": [[0.5]],
+    }
+
+    result = retrieval_service.search(
+        question=question,
+        top_k=top_k,
+        document_id=document_id,
+    )
+    assert result.question == "search test question"
+    assert len(result.results) == 1
+    assert result.results[0].chunk_id == "1_0"
+    assert result.results[0].content == ("search response with mock")
+    assert result.results[0].metadata.title == ("test title")
+    assert result.results[0].distance == 0.5
+
+    embedding_service.embedding_create.assert_called_once_with(question)
+
+    chroma_repository.search.assert_called_once_with(
+        query_embedding=query_embedding,
+        top_k=top_k,
+        document_id=document_id,
+    )

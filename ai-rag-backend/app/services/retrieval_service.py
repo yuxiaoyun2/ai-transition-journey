@@ -41,10 +41,6 @@ class RetrievalService:
             document_id=document_id,  # Metadata Filtering
         )
 
-        print(
-            f"=========={result}==========",
-        )
-
         ids = result.get(
             "ids",
             [[]],
@@ -93,10 +89,6 @@ class RetrievalService:
             # Distance Threshold
             if item.distance <= self.settings.retrieval_threshold:
                 items.append(item)
-
-        print(
-            f"=========={items}==========",
-        )
 
         return SearchResponse(
             question=question,
