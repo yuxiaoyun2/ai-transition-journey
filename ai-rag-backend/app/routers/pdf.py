@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, UploadFile, Depends
+from fastapi import APIRouter, File, UploadFile, Depends, Form
 
 from app.services.pdf_service import PDFService
 from app.repositories.chroma_repository import ChromaRepository
@@ -27,11 +27,11 @@ def get_pdf_service(db: Session = Depends(get_db)) -> PDFService:
 
 @router.post("/upload", response_model=UploadResponse)
 def upload_pdf(
-    title: str,
+    title: str = Form(...),
     file: UploadFile = File(...),
     service: PDFService = Depends(get_pdf_service),
 ):
     return service.upload_pdf(
-        title,
-        file,
+        title=title,
+        file=file,
     )
