@@ -1,11 +1,15 @@
+from pydantic import ValidationError
+
 from app.repositories.chroma_repository import ChromaRepository
-
 from app.schemas.search_schema import SearchItem, SearchResponse, ChunkMetadata
-
 from app.core.config import get_settings
-
 from app.services.embedding_service import (
     EmbeddingService,
+)
+from app.exceptions.custom_exceptions import (
+    MetadataNotFoundError,
+    TopkCheckError,
+    RetrievalError,
 )
 
 
@@ -31,7 +35,7 @@ class RetrievalService:
             top_k = self.settings.retrieval_top_k
 
         if top_k <= 0:
-            raise ValueError("top_kは1以上である必要があります。")
+            raise TopkCheckError()
 
         query_embedding = self.embedding_service.embedding_create(question)
 
@@ -40,6 +44,9 @@ class RetrievalService:
             top_k=top_k,  # Top-K Retrieval
             document_id=document_id,  # Metadata Filtering
         )
+
+        if result is None:
+            raise RetrievalError()
 
         ids = result.get(
             "ids",
@@ -75,9 +82,12 @@ class RetrievalService:
             distances,
         ):
             if raw_metadata is None:
-                raise ValueError("Metadataが存在しません。")
+                raise MetadataNotFoundError()
 
-            metadata = ChunkMetadata(**raw_metadata)
+            try:
+                metadata = ChunkMetadata(**raw_metadata)
+            except ValidationError as exc:
+                raise MetadataNotFoundError("Metadataの形式が不正です。") from exc
 
             item = SearchItem(
                 chunk_id=chunk_id,

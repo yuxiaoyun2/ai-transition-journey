@@ -1,5 +1,6 @@
 from openai import OpenAI, OpenAIError
 from app.core.config import get_settings
+from app.exceptions.custom_exceptions import AIServiceError
 
 
 class AIService:
@@ -11,11 +12,15 @@ class AIService:
         self,
         prompt: str,
     ) -> str:
-        settings = get_settings()
-        response = self.client.chat.completions.create(
-            model=settings.openai_chat_model,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        try:
+            settings = get_settings()
+            response = self.client.chat.completions.create(
+                model=settings.openai_chat_model,
+                messages=[{"role": "user", "content": prompt}],
+            )
+
+        except OpenAIError as exc:
+            raise AIServiceError() from exc
 
         content = response.choices[0].message.content
 

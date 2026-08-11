@@ -1,6 +1,7 @@
 from fastapi import UploadFile
 
 import pypdf
+from pypdf.errors import PdfReadError
 import os
 import shutil
 
@@ -10,6 +11,8 @@ from app.repositories.document_repository import DocumentRepository
 from app.models.document_model import Document
 from app.schemas.pdf_schema import UploadResponse
 from app.schemas.search_schema import ChunkMetadata
+from app.exceptions.custom_exceptions import ChunkCreateError, OverlapSettingError
+from app.exceptions.custom_exceptions import InvalidPDFError
 
 UPLOAD_DIR = "uploads"
 
@@ -35,6 +38,7 @@ class PDFService:
             os.makedirs(UPLOAD_DIR)
 
         filename = file.filename or "unknown.pdf"
+
         filepath = os.path.join(UPLOAD_DIR, filename)
 
         self.save_file(
@@ -57,7 +61,6 @@ class PDFService:
             page_chunks = self.split_text(page["text"])
 
             for chunk_index, chunk in enumerate(page_chunks):
-                print(f"===== Chunk {chunk_index} =====")
                 print(chunk)
                 chunks.append(chunk)
 
@@ -72,7 +75,7 @@ class PDFService:
                 metadatas.append(metadata.model_dump())
 
         if not chunks:
-            raise ValueError("Chunkを生成できませんでした。")
+            raise ChunkCreateError()
 
         embeddings = self.embedding_service.embeddings_create(chunks)
 
@@ -109,7 +112,10 @@ class PDFService:
         self,
         file: UploadFile,
     ) -> list[dict]:
-        reader = pypdf.PdfReader(file.file)
+        try:
+            reader = pypdf.PdfReader(file.file)
+        except PdfReadError as exc:
+            raise InvalidPDFError("PDFファイルを読み込めませんでした。") from exc
 
         pages = []
 
@@ -137,7 +143,7 @@ class PDFService:
     ) -> list[str]:
 
         if overlap >= chunk_size:
-            raise ValueError("overlapはchunk_sizeより小さくしてください。")
+            raise OverlapSettingError()
 
         chunks = []
         start = 0

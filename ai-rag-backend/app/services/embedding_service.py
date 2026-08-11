@@ -1,6 +1,7 @@
-from openai import OpenAI
+from openai import OpenAI, OpenAIError
 
 from app.core.config import get_settings
+from app.exceptions.custom_exceptions import AIServiceError
 
 
 class EmbeddingService:
@@ -23,10 +24,13 @@ class EmbeddingService:
         self,
         text: str,
     ) -> list[float]:
-        settings = get_settings()
-        response = self.client.embeddings.create(
-            model=settings.openai_embedding_model,
-            input=text,
-        )
+        try:
+            settings = get_settings()
+            response = self.client.embeddings.create(
+                model=settings.openai_embedding_model,
+                input=text,
+            )
+        except OpenAIError as exc:
+            raise AIServiceError() from exc
 
         return response.data[0].embedding
