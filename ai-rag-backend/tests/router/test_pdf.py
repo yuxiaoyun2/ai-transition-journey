@@ -9,7 +9,7 @@ from app.routers.pdf import get_pdf_service
 client = TestClient(app)
 
 
-def test_pdf():
+def test_pdf_router():
     mock_service = MagicMock()
 
     mock_service.upload_pdf.return_value = UploadResponse(
