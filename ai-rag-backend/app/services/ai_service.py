@@ -1,6 +1,7 @@
 from openai import OpenAI, OpenAIError
 from app.core.config import get_settings
 from app.exceptions.custom_exceptions import AIServiceError
+from app.core.logger import logger
 
 
 class AIService:
@@ -20,6 +21,7 @@ class AIService:
             )
 
         except OpenAIError as exc:
+            logger.exception("OpenAI chat request failed")
             raise AIServiceError() from exc
 
         content = response.choices[0].message.content

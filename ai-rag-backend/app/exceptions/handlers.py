@@ -11,6 +11,7 @@ from app.exceptions.custom_exceptions import (
     ChunkCreateError,
     OverlapSettingError,
 )
+from app.core.logger import logger
 
 
 def register_exception_handlers(
@@ -29,49 +30,75 @@ def register_exception_handlers(
         request: Request,
         exc: InvalidPDFError,
     ):
-        return error_response(400, exc.message)
+        logger.warning(
+            "Invalid PDF: path=%s message=%s",
+            request.url.path,
+            exc.message,
+        )
+        return error_response(
+            400,
+            exc.message,
+        )
 
     @app.exception_handler(AIServiceError)
     async def ai_service_handler(
         request: Request,
         exc: AIServiceError,
     ):
-        return error_response(503, exc.message)
+        return error_response(
+            503,
+            exc.message,
+        )
 
     @app.exception_handler(RetrievalError)
     async def retrieval_handler(
         request: Request,
         exc: RetrievalError,
     ):
-        return error_response(500, exc.message)
+        return error_response(
+            500,
+            exc.message,
+        )
 
     @app.exception_handler(TopkCheckError)
     async def top_k_check_handler(
         request: Request,
         exc: TopkCheckError,
     ):
-        return error_response(500, exc.message)
+        return error_response(
+            400,
+            exc.message,
+        )
 
     @app.exception_handler(MetadataNotFoundError)
     async def metadata_not_found_handler(
         request: Request,
         exc: MetadataNotFoundError,
     ):
-        return error_response(404, exc.message)
+        return error_response(
+            404,
+            exc.message,
+        )
 
     @app.exception_handler(ChunkCreateError)
     async def chunk_create_handler(
         request: Request,
         exc: ChunkCreateError,
     ):
-        return error_response(500, exc.message)
+        return error_response(
+            500,
+            exc.message,
+        )
 
     @app.exception_handler(OverlapSettingError)
     async def overlap_setting_handler(
         request: Request,
         exc: OverlapSettingError,
     ):
-        return error_response(500, exc.message)
+        return error_response(
+            400,
+            exc.message,
+        )
 
     def error_response(status_code: int, message: str):
         return JSONResponse(

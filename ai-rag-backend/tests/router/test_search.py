@@ -58,4 +58,41 @@ def test_search_router():
 
         assert response.headers["content-type"].startswith("application/json")
     finally:
-        app.dependency_overrides.pop(get_retrieval_service, None)
+        app.dependency_overrides.pop(
+            get_retrieval_service,
+            None,
+        )
+
+
+def test_top_k_pydantic_check_error():
+    mock_service = MagicMock()
+
+    def override_retrieval_service():
+        return mock_service
+
+    app.dependency_overrides[get_retrieval_service] = override_retrieval_service
+
+    try:
+
+        response = client.post(
+            "/search", json={"question": "search test", "top_k": 0, "document_id": 1}
+        )
+
+        assert response.status_code == 422
+
+        data = response.json()
+
+        assert "detail" in data
+        assert data["detail"][0]["loc"] == [
+            "body",
+            "top_k",
+        ]
+        assert data["detail"][0]["type"] == ("greater_than_equal")
+
+        mock_service.search.assert_not_called()
+
+    finally:
+        app.dependency_overrides.pop(
+            get_retrieval_service,
+            None,
+        )
