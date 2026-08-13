@@ -4,7 +4,7 @@ from app.services.pdf_service import PDFService
 from app.repositories.chroma_repository import ChromaRepository
 from app.services.embedding_service import EmbeddingService
 from app.repositories.document_repository import DocumentRepository
-from app.schemas.pdf_schema import UploadResponse
+from app.schemas.pdf_schema import UploadResponse, DeleteDocumentResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.core.openai_init import get_openai_client
@@ -35,3 +35,8 @@ def upload_pdf(
         title=title,
         file=file,
     )
+
+
+@router.delete("/{document_id}", response_model=DeleteDocumentResponse)
+def delete_pdf(document_id: int, service: PDFService = Depends(get_pdf_service)):
+    return service.delete_document(document_id=document_id)

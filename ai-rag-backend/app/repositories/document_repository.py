@@ -21,3 +21,16 @@ class DocumentRepository:
         except Exception:
             self.db.rollback()
             raise
+
+    def get_by_id(
+        self,
+        document_id: int,
+    ) -> Document | None:
+        return self.db.query(Document).filter(Document.id == document_id).first()
+
+    def delete(
+        self,
+        document: Document,
+    ) -> None:
+        self.db.delete(document)
+        self.db.commit()

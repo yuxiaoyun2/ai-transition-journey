@@ -45,3 +45,13 @@ class ChromaRepository:
             kwargs["where"] = {"document_id": document_id}
 
         return self.collection.query(**kwargs)
+
+    def delete_by_document_id(
+        self,
+        document_id: int,
+    ) -> None:
+        self.collection.delete(
+            where={
+                "document_id": document_id,
+            }
+        )

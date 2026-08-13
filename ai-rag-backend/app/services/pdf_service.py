@@ -9,10 +9,11 @@ from app.services.embedding_service import EmbeddingService
 from app.repositories.chroma_repository import ChromaRepository
 from app.repositories.document_repository import DocumentRepository
 from app.models.document_model import Document
-from app.schemas.pdf_schema import UploadResponse
+from app.schemas.pdf_schema import UploadResponse, DeleteDocumentResponse
 from app.schemas.search_schema import ChunkMetadata
 from app.exceptions.custom_exceptions import ChunkCreateError, OverlapSettingError
-from app.exceptions.custom_exceptions import InvalidPDFError
+from app.exceptions.custom_exceptions import InvalidPDFError, DocumentNotFoundError
+from app.core.logger import logger
 
 UPLOAD_DIR = "uploads"
 
@@ -165,3 +166,36 @@ class PDFService:
         chunk_count: int,
     ) -> list[str]:
         return [f"{document_id}_{i}" for i in range(chunk_count)]
+
+    def delete_document(self, document_id: int) -> DeleteDocumentResponse:
+        try:
+            document = self.document_repository.get_by_id(document_id=document_id)
+
+            if document is None:
+                raise DocumentNotFoundError()
+
+            self.chroma_repository.delete_by_document_id(document_id=document_id)
+
+            if os.path.exists(document.filepath):
+                os.remove(document.filepath)
+
+            self.document_repository.delete(document=document)
+
+        except DocumentNotFoundError:
+            raise
+
+        except Exception:
+            logger.exception(
+                "Failed to delete document: document_id=%s",
+                document_id,
+            )
+            raise
+
+        logger.info(
+            "Document deleted successfully: document_id=%s",
+            document_id,
+        )
+
+        return DeleteDocumentResponse(
+            success=True, message="Document deleted successfully."
+        )
