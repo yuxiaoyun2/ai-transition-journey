@@ -1,17 +1,21 @@
 from unittest.mock import MagicMock
 
 from app.services.retrieval_service import RetrievalService
-from app.schemas.search_schema import SearchItem, SearchResponse, ChunkMetadata
+from app.core.config import Settings
 
 
 def test_retrieval_service():
     embedding_service = MagicMock()
-
     chroma_repository = MagicMock()
+    settings = MagicMock(spec=Settings)
+
+    settings.retrieval_threshold = 1.0
+    settings.retrieval_top_k = 3
 
     retrieval_service = RetrievalService(
         embedding_service=embedding_service,
         chroma_repository=chroma_repository,
+        settings=settings,
     )
 
     question = "search test question"

@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 from app.services.pdf_service import PDFService
 from app.models.document_model import Document
 from app.exceptions.custom_exceptions import DocumentNotFoundError
+from app.core.config import Settings
 
 
 @patch("app.services.pdf_service.os.remove")
@@ -15,11 +16,13 @@ def test_pdf_service(
     embedding_service = MagicMock()
     chroma_repository = MagicMock()
     document_repository = MagicMock()
+    settings = MagicMock(spec=Settings)
 
     pdf_service = PDFService(
         embedding_service=embedding_service,
         chroma_repository=chroma_repository,
         document_repository=document_repository,
+        settings=settings,
     )
 
     document = Document(
@@ -31,7 +34,7 @@ def test_pdf_service(
 
     result = pdf_service.delete_document(document_id=1)
 
-    assert result.success == True
+    assert result.success is True
     assert result.message == "Document deleted successfully."
 
     document_repository.get_by_id.assert_called_once_with(document_id=1)
@@ -54,11 +57,13 @@ def test_pdf_not_found(
     embedding_service = MagicMock()
     chroma_repository = MagicMock()
     document_repository = MagicMock()
+    settings = MagicMock(spec=Settings)
 
     pdf_service = PDFService(
         embedding_service=embedding_service,
         chroma_repository=chroma_repository,
         document_repository=document_repository,
+        settings=settings,
     )
 
     document_repository.get_by_id.return_value = None

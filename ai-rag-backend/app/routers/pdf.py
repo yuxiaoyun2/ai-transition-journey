@@ -8,6 +8,7 @@ from app.schemas.pdf_schema import UploadResponse, DeleteDocumentResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.core.openai_init import get_openai_client
+from app.core.config import get_settings
 
 router = APIRouter()
 
@@ -17,11 +18,13 @@ def get_pdf_service(db: Session = Depends(get_db)) -> PDFService:
     embedding_service = EmbeddingService(client=client)
     chroma_repository = ChromaRepository()
     document_repository = DocumentRepository(db)
+    settings = get_settings()
 
     return PDFService(
         embedding_service,
         chroma_repository,
         document_repository,
+        settings,
     )
 
 

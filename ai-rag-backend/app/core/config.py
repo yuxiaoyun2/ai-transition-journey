@@ -12,11 +12,17 @@ class Settings(BaseSettings):
     retrieval_top_k: int = 3
     retrieval_threshold: float = 0.85
 
+    chunk_size: int = 500
+    chunk_overlap: int = 100
+
+    embedding_batch_size: int = 50
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )
+    upload_dir: str = "uploads"
 
 
 @lru_cache

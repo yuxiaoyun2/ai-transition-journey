@@ -14,6 +14,7 @@ from app.schemas.search_schema import ChunkMetadata
 from app.exceptions.custom_exceptions import ChunkCreateError, OverlapSettingError
 from app.exceptions.custom_exceptions import InvalidPDFError, DocumentNotFoundError
 from app.core.logger import logger
+from app.core.config import Settings
 
 UPLOAD_DIR = "uploads"
 
@@ -25,10 +26,12 @@ class PDFService:
         embedding_service: EmbeddingService,
         chroma_repository: ChromaRepository,
         document_repository: DocumentRepository,
+        settings: Settings,
     ):
         self.embedding_service = embedding_service
         self.chroma_repository = chroma_repository
         self.document_repository = document_repository
+        self.settings = settings
 
     def upload_pdf(
         self,
@@ -85,10 +88,6 @@ class PDFService:
             chunk_count=len(chunks),
         )
 
-        print("pages count:", len(pages))
-        print("chunks count:", len(chunks))
-        print("ids:", ids)
-
         success = self.chroma_repository.insert(
             ids=ids,
             embeddings=embeddings,
@@ -113,6 +112,9 @@ class PDFService:
         self,
         file: UploadFile,
     ) -> list[dict]:
+        if not file.filename.lower().endswith(".pdf"):
+            raise InvalidPDFError("PDFファイルのみアップロードできます。")
+
         try:
             reader = pypdf.PdfReader(file.file)
         except PdfReadError as exc:
@@ -139,9 +141,9 @@ class PDFService:
     def split_text(
         self,
         text: str,
-        chunk_size: int = 500,
-        overlap: int = 100,
     ) -> list[str]:
+        chunk_size = self.settings.chunk_size
+        overlap = self.settings.chunk_overlap
 
         if overlap >= chunk_size:
             raise OverlapSettingError()

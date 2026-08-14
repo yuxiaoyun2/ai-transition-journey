@@ -2,7 +2,7 @@ from pydantic import ValidationError
 
 from app.repositories.chroma_repository import ChromaRepository
 from app.schemas.search_schema import SearchItem, SearchResponse, ChunkMetadata
-from app.core.config import get_settings
+from app.core.config import Settings
 from app.services.embedding_service import (
     EmbeddingService,
 )
@@ -19,10 +19,11 @@ class RetrievalService:
         self,
         embedding_service: EmbeddingService,
         chroma_repository: ChromaRepository,
+        settings=Settings,
     ):
         self.embedding_service = embedding_service
         self.chroma_repository = chroma_repository
-        self.settings = get_settings()
+        self.settings = settings
 
     def search(
         self,
