@@ -2,6 +2,7 @@ from openai import OpenAI, OpenAIError
 
 from app.core.config import get_settings
 from app.exceptions.custom_exceptions import AIServiceError
+from app.core.logger import logger
 
 
 class EmbeddingService:
@@ -13,24 +14,16 @@ class EmbeddingService:
         self,
         texts: list[str],
     ) -> list[list[float]]:
-        embeddings = []
-
-        for text in texts:
-            embeddings.append(self.embedding_create(text))
-
-        return embeddings
-
-    def embedding_create(
-        self,
-        text: str,
-    ) -> list[float]:
         try:
             settings = get_settings()
+
             response = self.client.embeddings.create(
                 model=settings.openai_embedding_model,
-                input=text,
+                input=texts,
             )
+
         except OpenAIError as exc:
+            logger.exception("Embedding API request failed")
             raise AIServiceError() from exc
 
-        return response.data[0].embedding
+        return [item.embedding for item in response.data]
