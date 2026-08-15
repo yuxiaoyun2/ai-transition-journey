@@ -16,8 +16,6 @@ from app.exceptions.custom_exceptions import InvalidPDFError, DocumentNotFoundEr
 from app.core.logger import logger
 from app.core.config import Settings
 
-UPLOAD_DIR = "uploads"
-
 
 class PDFService:
 
@@ -38,62 +36,87 @@ class PDFService:
         title: str,
         file: UploadFile,
     ) -> UploadResponse:
-        if not os.path.exists(UPLOAD_DIR):
-            os.makedirs(UPLOAD_DIR)
-
+        document = None
         filename = file.filename or "unknown.pdf"
+        filepath = os.path.join(self.settings.upload_dir, filename)
 
-        filepath = os.path.join(UPLOAD_DIR, filename)
+        try:
+            if not file.filename.lower().endswith(".pdf"):
+                raise InvalidPDFError("PDFファイルのみアップロードできます。")
 
-        self.save_file(
-            file=file,
-            filepath=filepath,
-        )
+            if not os.path.exists(self.settings.upload_dir):
+                os.makedirs(self.settings.upload_dir)
 
-        file.file.seek(0)
+            self.save_file(
+                file=file,
+                filepath=filepath,
+            )
 
-        pages = self.pdf_to_pages(file)
+            file.file.seek(0)
 
-        document = Document(title=title, filename=filename, filepath=filepath)
+            pages = self.pdf_to_pages(file)
 
-        document = self.document_repository.create(document)
+            obj = Document(title=title, filename=filename, filepath=filepath)
+            document = self.document_repository.create(obj)
 
-        chunks = []
-        metadatas = []
+            chunks = []
+            metadatas = []
 
-        for page in pages:
-            page_chunks = self.split_text(page["text"])
+            for page in pages:
+                page_chunks = self.split_text(page["text"])
 
-            for chunk_index, chunk in enumerate(page_chunks):
-                print(chunk)
-                chunks.append(chunk)
+                for chunk_index, chunk in enumerate(page_chunks):
+                    chunks.append(chunk)
 
-                metadata = ChunkMetadata(
-                    document_id=document.id,
-                    title=title,
-                    filename=filename,
-                    page_number=page["page_number"],
-                    chunk_index=chunk_index,
-                )
+                    metadata = ChunkMetadata(
+                        document_id=document.id,
+                        title=document.title,
+                        filename=document.filename,
+                        page_number=page["page_number"],
+                        chunk_index=chunk_index,
+                    )
 
-                metadatas.append(metadata.model_dump())
+                    metadatas.append(metadata.model_dump())
 
-        if not chunks:
-            raise ChunkCreateError()
+            if not chunks:
+                raise ChunkCreateError()
 
-        embeddings = self.embedding_service.embeddings_create(chunks)
+            embeddings = self.embedding_service.embeddings_create(chunks)
 
-        ids = self.get_ids(
-            document_id=document.id,
-            chunk_count=len(chunks),
-        )
+            ids = self.get_ids(
+                document_id=document.id,
+                chunk_count=len(chunks),
+            )
 
-        success = self.chroma_repository.insert(
-            ids=ids,
-            embeddings=embeddings,
-            chunks=chunks,
-            metadatas=metadatas,
-        )
+            success = self.chroma_repository.insert(
+                ids=ids,
+                embeddings=embeddings,
+                chunks=chunks,
+                metadatas=metadatas,
+            )
+
+        except Exception:
+            try:
+                if document is not None:
+                    self.chroma_repository.delete_by_document_id(
+                        document_id=document.id
+                    )
+            except Exception:
+                logger.exception("Rollback failed: chroma cleanup")
+
+            try:
+                if document is not None:
+                    self.document_repository.delete(document=document)
+            except Exception:
+                logger.exception("Rollback failed: database cleanup")
+
+            try:
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+            except Exception:
+                logger.exception("Rollback failed: file cleanup")
+
+            raise
 
         return UploadResponse(success=success, message="Upload completed.")
 
@@ -112,8 +135,6 @@ class PDFService:
         self,
         file: UploadFile,
     ) -> list[dict]:
-        if not file.filename.lower().endswith(".pdf"):
-            raise InvalidPDFError("PDFファイルのみアップロードできます。")
 
         try:
             reader = pypdf.PdfReader(file.file)
