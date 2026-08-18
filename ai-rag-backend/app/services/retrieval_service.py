@@ -1,6 +1,7 @@
 from pydantic import ValidationError
 
 from app.repositories.chroma_repository import ChromaRepository
+from app.repositories.document_repository import DocumentRepository
 from app.schemas.search_schema import SearchItem, SearchResponse, ChunkMetadata
 from app.core.config import Settings
 from app.services.embedding_service import (
@@ -10,6 +11,7 @@ from app.exceptions.custom_exceptions import (
     MetadataNotFoundError,
     TopkCheckError,
     RetrievalError,
+    DocumentNotFoundError,
 )
 
 
@@ -19,10 +21,12 @@ class RetrievalService:
         self,
         embedding_service: EmbeddingService,
         chroma_repository: ChromaRepository,
+        document_repository: DocumentRepository,
         settings=Settings,
     ):
         self.embedding_service = embedding_service
         self.chroma_repository = chroma_repository
+        self.document_repository = document_repository
         self.settings = settings
 
     def search(
@@ -38,7 +42,12 @@ class RetrievalService:
         if top_k <= 0:
             raise TopkCheckError()
 
-        query_embedding = self.embedding_service.embedding_create(question)
+        if document_id is not None:
+            document = self.document_repository.get_by_id(document_id=document_id)
+            if document is None:
+                raise DocumentNotFoundError()
+
+        query_embedding = self.embedding_service.embeddings_create(question)
 
         result = self.chroma_repository.search(
             query_embedding=query_embedding,

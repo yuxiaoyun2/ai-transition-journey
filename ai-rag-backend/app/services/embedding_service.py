@@ -1,24 +1,27 @@
 from openai import OpenAI, OpenAIError
 
-from app.core.config import get_settings
+from app.core.config import Settings
 from app.exceptions.custom_exceptions import AIServiceError
 from app.core.logger import logger
 
 
 class EmbeddingService:
 
-    def __init__(self, client: OpenAI):
+    def __init__(
+        self,
+        client: OpenAI,
+        settings: Settings,
+    ):
         self.client = client
+        self.settings = settings
 
     def embeddings_create(
         self,
         texts: list[str],
     ) -> list[list[float]]:
         try:
-            settings = get_settings()
-
             response = self.client.embeddings.create(
-                model=settings.openai_embedding_model,
+                model=self.settings.openai_embedding_model,
                 input=texts,
             )
 

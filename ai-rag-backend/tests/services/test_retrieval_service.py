@@ -2,11 +2,13 @@ from unittest.mock import MagicMock
 
 from app.services.retrieval_service import RetrievalService
 from app.core.config import Settings
+from app.models.document_model import Document
 
 
 def test_retrieval_service():
     embedding_service = MagicMock()
     chroma_repository = MagicMock()
+    document_repository = MagicMock()
     settings = MagicMock(spec=Settings)
 
     settings.retrieval_threshold = 1.0
@@ -15,6 +17,7 @@ def test_retrieval_service():
     retrieval_service = RetrievalService(
         embedding_service=embedding_service,
         chroma_repository=chroma_repository,
+        document_repository=document_repository,
         settings=settings,
     )
 
@@ -23,7 +26,7 @@ def test_retrieval_service():
     top_k = 3
     document_id = 1
 
-    embedding_service.embedding_create.return_value = query_embedding
+    embedding_service.embeddings_create.return_value = query_embedding
 
     chroma_repository.search.return_value = {
         "ids": [["1_0"]],
@@ -42,6 +45,13 @@ def test_retrieval_service():
         "distances": [[0.5]],
     }
 
+    document_repository.get_by_id.return_value = Document(
+        id=1,
+        title="test title",
+        filename="test.pdf",
+        filepath="uploads/test.pdf",
+    )
+
     result = retrieval_service.search(
         question=question,
         top_k=top_k,
@@ -54,10 +64,12 @@ def test_retrieval_service():
     assert result.results[0].metadata.title == ("test title")
     assert result.results[0].distance == 0.5
 
-    embedding_service.embedding_create.assert_called_once_with(question)
+    embedding_service.embeddings_create.assert_called_once_with(question)
 
     chroma_repository.search.assert_called_once_with(
         query_embedding=query_embedding,
         top_k=top_k,
         document_id=document_id,
     )
+
+    document_repository.get_by_id.assert_called_once_with(document_id=document_id)

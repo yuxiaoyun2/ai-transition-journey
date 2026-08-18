@@ -15,10 +15,11 @@ router = APIRouter()
 
 def get_pdf_service(db: Session = Depends(get_db)) -> PDFService:
     client = get_openai_client()
-    embedding_service = EmbeddingService(client=client)
+    settings = get_settings()
+
+    embedding_service = EmbeddingService(client=client, settings=settings)
     chroma_repository = ChromaRepository()
     document_repository = DocumentRepository(db)
-    settings = get_settings()
 
     return PDFService(
         embedding_service,

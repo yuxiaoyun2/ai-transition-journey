@@ -4,6 +4,8 @@ import pypdf
 from pypdf.errors import PdfReadError
 import os
 import shutil
+from uuid import uuid4
+from pathlib import Path
 
 from app.services.embedding_service import EmbeddingService
 from app.repositories.chroma_repository import ChromaRepository
@@ -37,8 +39,16 @@ class PDFService:
         file: UploadFile,
     ) -> UploadResponse:
         document = None
-        filename = file.filename or "unknown.pdf"
-        filepath = os.path.join(self.settings.upload_dir, filename)
+        original_filename = file.filename or "unknown.pdf"
+
+        suffix = Path(original_filename).suffix
+
+        stored_filename = f"{uuid4()}{suffix}"
+
+        filepath = os.path.join(
+            self.settings.upload_dir,
+            stored_filename,
+        )
 
         try:
             if not file.filename.lower().endswith(".pdf"):
@@ -56,7 +66,7 @@ class PDFService:
 
             pages = self.pdf_to_pages(file)
 
-            obj = Document(title=title, filename=filename, filepath=filepath)
+            obj = Document(title=title, filename=original_filename, filepath=filepath)
             document = self.document_repository.create(obj)
 
             chunks = []

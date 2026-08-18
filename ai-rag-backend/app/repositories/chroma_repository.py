@@ -27,12 +27,12 @@ class ChromaRepository:
 
     def search(
         self,
-        query_embedding: list[float],
+        query_embedding: list[list[float]],
         top_k: int = 3,
         document_id: int | None = None,
     ) -> dict:
         kwargs = {
-            "query_embeddings": [query_embedding],
+            "query_embeddings": query_embedding,
             "n_results": top_k,
             "include": [
                 "documents",
