@@ -47,7 +47,7 @@ class RetrievalService:
             if document is None:
                 raise DocumentNotFoundError()
 
-        query_embedding = self.embedding_service.embeddings_create(question)
+        query_embedding = self.embedding_service.embeddings_create([question])
 
         result = self.chroma_repository.search(
             query_embedding=query_embedding,

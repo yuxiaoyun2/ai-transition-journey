@@ -22,7 +22,7 @@ def test_retrieval_service():
     )
 
     question = "search test question"
-    query_embedding = [0.5, 0.7, 0.9]
+    query_embedding = [[0.5, 0.7, 0.9]]
     top_k = 3
     document_id = 1
 
@@ -64,7 +64,7 @@ def test_retrieval_service():
     assert result.results[0].metadata.title == ("test title")
     assert result.results[0].distance == 0.5
 
-    embedding_service.embeddings_create.assert_called_once_with(question)
+    embedding_service.embeddings_create.assert_called_once_with([question])
 
     chroma_repository.search.assert_called_once_with(
         query_embedding=query_embedding,
