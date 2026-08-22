@@ -67,7 +67,8 @@ def test_pdf_upload_error(
 
     document_repository.delete.assert_called_once_with(document=document)
 
-    mock_remove.assert_called_once_with("/upload/test.pdf")
+    saved_filepath = mock_save_file.call_args.kwargs["filepath"]
+    mock_remove.assert_called_once_with(saved_filepath)
 
     chroma_repository.insert.assert_not_called()
 
