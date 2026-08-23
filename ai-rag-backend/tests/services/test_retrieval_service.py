@@ -73,3 +73,39 @@ def test_retrieval_service():
     )
 
     document_repository.get_by_id.assert_called_once_with(document_id=document_id)
+
+
+def test_retrieval_service_uses_settings_top_k_by_default():
+    embedding_service = MagicMock()
+    chroma_repository = MagicMock()
+    document_repository = MagicMock()
+    settings = MagicMock(spec=Settings)
+    settings.retrieval_threshold = 1.0
+    settings.retrieval_top_k = 7
+
+    retrieval_service = RetrievalService(
+        embedding_service=embedding_service,
+        chroma_repository=chroma_repository,
+        document_repository=document_repository,
+        settings=settings,
+    )
+
+    question = "search test question"
+    query_embedding = [[0.5, 0.7, 0.9]]
+    embedding_service.embeddings_create.return_value = query_embedding
+    chroma_repository.search.return_value = {
+        "ids": [[]],
+        "documents": [[]],
+        "metadatas": [[]],
+        "distances": [[]],
+    }
+
+    result = retrieval_service.search(question=question)
+
+    assert result.question == question
+    assert result.results == []
+    chroma_repository.search.assert_called_once_with(
+        query_embedding=query_embedding,
+        top_k=7,
+        document_id=None,
+    )

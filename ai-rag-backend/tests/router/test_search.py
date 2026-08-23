@@ -96,3 +96,33 @@ def test_top_k_pydantic_check_error():
             get_retrieval_service,
             None,
         )
+
+
+def test_search_router_omits_top_k_for_service_default():
+    mock_service = MagicMock()
+    mock_service.search.return_value = SearchResponse(
+        question="search test",
+        results=[],
+    )
+
+    def override_retrieval_service():
+        return mock_service
+
+    app.dependency_overrides[get_retrieval_service] = override_retrieval_service
+
+    try:
+        response = client.post(
+            "/search", json={"question": "search test", "document_id": 1}
+        )
+
+        assert response.status_code == 200
+        mock_service.search.assert_called_once_with(
+            question="search test",
+            top_k=None,
+            document_id=1,
+        )
+    finally:
+        app.dependency_overrides.pop(
+            get_retrieval_service,
+            None,
+        )

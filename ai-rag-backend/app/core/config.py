@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,7 +10,7 @@ class Settings(BaseSettings):
     openai_chat_model: str = "gpt-5-mini"
     openai_embedding_model: str = "text-embedding-3-small"
 
-    retrieval_top_k: int = 3
+    retrieval_top_k: int = Field(default=3, ge=1, le=10)
     retrieval_threshold: float = 0.85
 
     chunk_size: int = 500
