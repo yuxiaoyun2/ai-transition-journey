@@ -29,7 +29,7 @@ def get_retrieval_service(db: Session = Depends(get_db)) -> RetrievalService:
     )
 
 
-@router.post("", response_model=SearchResponse)
+@router.post("", response_model=SearchResponse, response_model_exclude_none=True)
 def search_documents(
     request: SearchRequest,
     service: RetrievalService = Depends(get_retrieval_service),

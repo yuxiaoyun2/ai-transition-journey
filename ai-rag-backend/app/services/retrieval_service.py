@@ -113,4 +113,5 @@ class RetrievalService:
         return SearchResponse(
             question=question,
             results=items,
+            message="No relevant results found." if not items else None,
         )

@@ -36,3 +36,4 @@ class SearchItem(BaseModel):
 class SearchResponse(BaseModel):
     question: str
     results: list[SearchItem]
+    message: str | None = None

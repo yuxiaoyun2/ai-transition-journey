@@ -49,6 +49,7 @@ def test_search_router():
         assert data["results"][0]["metadata"]["title"] == "test title"
         assert data["results"][0]["metadata"]["filename"] == "test filename"
         assert data["results"][0]["distance"] == 0.5
+        assert "message" not in data
 
         mock_service.search.assert_called_once_with(
             question="search test",
@@ -103,6 +104,7 @@ def test_search_router_omits_top_k_for_service_default():
     mock_service.search.return_value = SearchResponse(
         question="search test",
         results=[],
+        message="No relevant results found.",
     )
 
     def override_retrieval_service():
@@ -116,6 +118,11 @@ def test_search_router_omits_top_k_for_service_default():
         )
 
         assert response.status_code == 200
+        assert response.json() == {
+            "question": "search test",
+            "results": [],
+            "message": "No relevant results found.",
+        }
         mock_service.search.assert_called_once_with(
             question="search test",
             top_k=None,
