@@ -22,11 +22,11 @@ def test_retrieval_service():
     )
 
     question = "search test question"
-    query_embedding = [[0.5, 0.7, 0.9]]
+    query_embeddings = [[0.5, 0.7, 0.9]]
     top_k = 3
     document_id = 1
 
-    embedding_service.embeddings_create.return_value = query_embedding
+    embedding_service.embeddings_create.return_value = query_embeddings
 
     chroma_repository.search.return_value = {
         "ids": [["1_0"]],
@@ -68,7 +68,7 @@ def test_retrieval_service():
     embedding_service.embeddings_create.assert_called_once_with([question])
 
     chroma_repository.search.assert_called_once_with(
-        query_embedding=query_embedding,
+        query_embeddings=query_embeddings,
         top_k=top_k,
         document_id=document_id,
     )
@@ -92,8 +92,8 @@ def test_retrieval_service_uses_settings_top_k_by_default():
     )
 
     question = "search test question"
-    query_embedding = [[0.5, 0.7, 0.9]]
-    embedding_service.embeddings_create.return_value = query_embedding
+    query_embeddings = [[0.5, 0.7, 0.9]]
+    embedding_service.embeddings_create.return_value = query_embeddings
     chroma_repository.search.return_value = {
         "ids": [[]],
         "documents": [[]],
@@ -107,7 +107,7 @@ def test_retrieval_service_uses_settings_top_k_by_default():
     assert result.results == []
     assert result.message == "No relevant results found."
     chroma_repository.search.assert_called_once_with(
-        query_embedding=query_embedding,
+        query_embeddings=query_embeddings,
         top_k=7,
         document_id=None,
     )
