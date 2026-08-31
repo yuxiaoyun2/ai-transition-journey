@@ -35,7 +35,8 @@ def get_chat_service(
     retrieval_service: RetrievalService = Depends(get_retrieval_service),
 ) -> ChatService:
     client = get_openai_client()
-    ai_service = AIService(client=client)
+    settings = get_settings()
+    ai_service = AIService(client=client, settings=settings)
 
     return ChatService(ai_service=ai_service, retrieval_service=retrieval_service)
 

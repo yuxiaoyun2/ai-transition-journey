@@ -1,22 +1,22 @@
 from openai import OpenAI, OpenAIError
-from app.core.config import get_settings
+from app.core.config import Settings
 from app.exceptions.custom_exceptions import AIServiceError
 from app.core.logger import logger
 
 
 class AIService:
 
-    def __init__(self, client: OpenAI):
+    def __init__(self, client: OpenAI, settings: Settings):
         self.client = client
+        self.settings = settings
 
     def generate_chat(
         self,
         prompt: str,
     ) -> str:
         try:
-            settings = get_settings()
             response = self.client.chat.completions.create(
-                model=settings.openai_chat_model,
+                model=self.settings.openai_chat_model,
                 messages=[{"role": "user", "content": prompt}],
             )
 

@@ -106,29 +106,33 @@ class PDFService:
             )
 
         except Exception:
-            try:
-                if document is not None:
-                    self.chroma_repository.delete_by_document_id(
-                        document_id=document.id
-                    )
-            except Exception:
-                logger.exception("Rollback failed: chroma cleanup")
-
-            try:
-                if document is not None:
-                    self.document_repository.delete(document=document)
-            except Exception:
-                logger.exception("Rollback failed: database cleanup")
-
-            try:
-                if os.path.exists(filepath):
-                    os.remove(filepath)
-            except Exception:
-                logger.exception("Rollback failed: file cleanup")
-
+            self._rollback_upload(document=document, filepath=filepath)
             raise
 
         return UploadResponse(success=success, message="Upload completed.")
+
+    def _rollback_upload(
+        self,
+        document: Document | None,
+        filepath: str,
+    ) -> None:
+        try:
+            if document is not None:
+                self.chroma_repository.delete_by_document_id(document_id=document.id)
+        except Exception:
+            logger.exception("Rollback failed: chroma cleanup")
+
+        try:
+            if document is not None:
+                self.document_repository.delete(document=document)
+        except Exception:
+            logger.exception("Rollback failed: database cleanup")
+
+        try:
+            if os.path.exists(filepath):
+                os.remove(filepath)
+        except Exception:
+            logger.exception("Rollback failed: file cleanup")
 
     def save_file(
         self,

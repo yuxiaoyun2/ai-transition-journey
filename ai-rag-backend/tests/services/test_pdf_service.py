@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 from io import BytesIO
 from fastapi import UploadFile
 
@@ -71,6 +71,93 @@ def test_pdf_upload_error(
     mock_remove.assert_called_once_with(saved_filepath)
 
     chroma_repository.insert.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    ("failing_cleanup", "expected_log"),
+    [
+        ("chroma", "Rollback failed: chroma cleanup"),
+        ("database", "Rollback failed: database cleanup"),
+    ],
+)
+@patch("app.services.pdf_service.logger.exception")
+@patch("app.services.pdf_service.os.remove")
+@patch("app.services.pdf_service.os.path.exists")
+@patch("app.services.pdf_service.PDFService.save_file")
+def test_pdf_upload_rollback_continues_and_reraises_original_error(
+    mock_save_file,
+    mock_exists,
+    mock_remove,
+    mock_logger_exception,
+    failing_cleanup,
+    expected_log,
+):
+    embedding_service = MagicMock()
+    chroma_repository = MagicMock()
+    document_repository = MagicMock()
+    settings = MagicMock(spec=Settings)
+    settings.upload_dir = "/upload"
+    settings.chunk_size = 500
+    settings.chunk_overlap = 100
+
+    pdf_service = PDFService(
+        embedding_service=embedding_service,
+        chroma_repository=chroma_repository,
+        document_repository=document_repository,
+        settings=settings,
+    )
+
+    document = Document(
+        id=1,
+        title="test title",
+        filename="test.pdf",
+        filepath="/upload/test.pdf",
+    )
+    document_repository.create.return_value = document
+    mock_exists.return_value = True
+
+    upload_error = AIServiceError()
+    embedding_service.embeddings_create.side_effect = upload_error
+
+    if failing_cleanup == "chroma":
+        chroma_repository.delete_by_document_id.side_effect = RuntimeError(
+            "chroma cleanup failed"
+        )
+    else:
+        document_repository.delete.side_effect = RuntimeError("database cleanup failed")
+
+    pdf_service.pdf_to_pages = MagicMock(
+        return_value=[{"page_number": 1, "text": "test pdf content"}]
+    )
+
+    cleanup_order = MagicMock()
+    cleanup_order.attach_mock(
+        chroma_repository.delete_by_document_id,
+        "chroma",
+    )
+    cleanup_order.attach_mock(
+        document_repository.delete,
+        "database",
+    )
+    cleanup_order.attach_mock(mock_remove, "file")
+
+    upload_file = UploadFile(
+        filename="test.pdf",
+        file=BytesIO(b"dummy pdf content"),
+    )
+
+    with pytest.raises(AIServiceError) as exc_info:
+        pdf_service.upload_pdf(title="test", file=upload_file)
+
+    assert exc_info.value is upload_error
+
+    saved_filepath = mock_save_file.call_args.kwargs["filepath"]
+    assert cleanup_order.mock_calls == [
+        call.chroma(document_id=1),
+        call.database(document=document),
+        call.file(saved_filepath),
+    ]
+    mock_logger_exception.assert_called_once_with(expected_log)
 
 
 @patch("app.services.pdf_service.os.remove")
